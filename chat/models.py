@@ -13,6 +13,7 @@ def code_generator():
 
 class User(AbstractUser):
     avatar = models.ImageField(upload_to='user_avatar/', blank=True, null=True)
+    bio = models.TextField(max_length=200)
 
 
 class Group(models.Model):
