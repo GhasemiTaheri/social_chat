@@ -1,6 +1,5 @@
 import random
-
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
@@ -10,6 +9,10 @@ def code_generator():
     for _ in range(15):
         result += data[random.randint(0, (len(data) - 1))]
     return result
+
+
+class User(AbstractUser):
+    avatar = models.ImageField(upload_to='user_avatar/', blank=True, null=True)
 
 
 class Group(models.Model):
