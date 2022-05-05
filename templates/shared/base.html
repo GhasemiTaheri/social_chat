@@ -82,6 +82,10 @@
 
                 <li><a href="#" class="d-flex align-items-center"><i class="bi bi-gear-fill mr-3"></i><span
                         class="menu-text">Settings</span></a></li>
+
+                <li><a href="{% url 'logout' %}" class="d-flex align-items-center"><i
+                        class="bi bi-box-arrow-left mr-3"></i><span
+                        class="menu-text">Logout</span></a></li>
             </ul>
         </div>
     </div>
@@ -92,7 +96,8 @@
     <div class="site-section">
         <div class="container">
             <div class="row justify-content-center">
-
+                {% block body %}
+                {% endblock %}
             </div>
         </div>
     </div>

@@ -85,6 +85,10 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'chat.User'
 
+LOGIN_REDIRECT_URL = '/chat/'
+LOGIN_URL = '/login/'
+LOGOUT_REDIRECT_URL = '/'
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
