@@ -1,0 +1,24 @@
+{% extends 'user/authorize-page.html' %}
+{% load crispy_forms_tags %}
+
+{% block form %}
+    <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Create your account</h5>
+
+    {% if form.errors %}
+        <div class="alert alert-warning">
+            <p>Your username and password didn't match. Please try again.</p>
+        </div>
+    {% endif %}
+    <form action="." method="post">
+        {% csrf_token %}
+        {{ register_form|crispy }}
+
+        <div class="pt-1 my-4">
+            <button class="btn btn-dark btn-lg btn-block" type="submit">Register</button>
+        </div>
+
+        <p class="mb-5 pb-lg-2" style="color: #393f81;">Have an account?
+            <a href="{% url 'login' %}" style="color: #393f81;">Login here</a>
+        </p>
+    </form>
+{% endblock %}

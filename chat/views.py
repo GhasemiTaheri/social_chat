@@ -6,7 +6,7 @@ from django.shortcuts import render
 # Create your views here.
 
 @login_required
-def index(request):
+def dashboard(request):
     return render(request, 'shared/base.html', {
         'profile': request.user
     })
