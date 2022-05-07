@@ -23,10 +23,18 @@
 <nav class="navbar navbar-light bg-light static-top">
     <div class="container">
         <a class="navbar-brand" href="{% url 'user:index' %}">Social Chat</a>
-        <div>
-            <a class="btn btn-primary" href="{% url 'register' %}">Sign Up</a>
-            <a class="btn btn-secondary" href="{% url 'login' %}">Login</a>
-        </div>
+        {% if user.is_authenticated %}
+            <div>
+                <a class="btn btn-success" href="{% url 'chat:dashboard' %}">Dashboard</a>
+                <a class="btn btn-secondary" href="{% url 'logout' %}">Logout</a>
+            </div>
+        {% else %}
+            <div>
+                <a class="btn btn-primary" href="{% url 'register' %}">Sign Up</a>
+                <a class="btn btn-secondary" href="{% url 'login' %}">Login</a>
+            </div>
+        {% endif %}
+
     </div>
 </nav>
 

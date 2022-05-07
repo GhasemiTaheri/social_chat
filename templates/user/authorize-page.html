@@ -5,13 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Login</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}"/>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 </head>
-<body>
+<body style="background: url('{% static 'img/bg-masthead.jpg' %}') no-repeat center center;">
 
-<section style="background: url('{% static 'img/bg-masthead.jpg' %}') no-repeat center center;">
+<section>
     <div class="container py-5 h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col col-xl-10">
@@ -42,6 +44,9 @@
         </div>
     </div>
 </section>
+{% block Script %}
+
+{% endblock %}
 
 </body>
 </html>

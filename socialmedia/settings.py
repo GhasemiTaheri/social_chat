@@ -25,7 +25,7 @@ SECRET_KEY = open('secret_key.txt', 'r').read()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -90,6 +90,8 @@ AUTH_USER_MODEL = 'user.User'
 LOGIN_REDIRECT_URL = '/chat/'
 LOGIN_URL = '/login/'
 LOGOUT_REDIRECT_URL = '/'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
