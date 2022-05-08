@@ -56,10 +56,6 @@ body.show-sidebar:before {
     visibility: visible;
 }
 
-.site-section {
-    padding: 7rem 0;
-}
-
 aside, main {
     height: 100vh;
     min-height: 580px;
@@ -87,13 +83,7 @@ aside {
 }
 
 aside .toggle {
-    padding-left: 30px;
-    padding-top: 30px;
-    position: absolute;
-    right: 0;
-    -webkit-transform: translateX(100%);
-    -ms-transform: translateX(100%);
-    transform: translateX(100%);
+    margin: 0 20px;
 }
 
 .show-sidebar aside .toggle .burger:before, .show-sidebar aside .toggle .burger span, .show-sidebar aside .toggle .burger:after {
@@ -107,7 +97,7 @@ aside .toggle {
 
 aside .side-inner {
     height: 100vh;
-    overflow-y: scroll;
+    /*overflow-y: scroll;*/
     -webkit-overflow-scrolling: touch;
     -ms-overflow-style: none;
 }
@@ -195,7 +185,7 @@ aside .side-inner .search-form form {
 aside .side-inner .search-form form .form-control {
     border-radius: 30px;
     border: 1px solid transparent;
-    padding-left: 40px;
+    padding-left: 30px;
 }
 
 aside .side-inner .search-form form .form-control:active, aside .side-inner .search-form form .form-control:focus {
@@ -283,7 +273,7 @@ aside .side-inner .nav-menu ul li.active a {
 }
 
 main {
-    width: calc(100%);
+    width: 100%;
     -webkit-transition: 1s -webkit-transform cubic-bezier(0.23, 1, 0.32, 1);
     transition: 1s -webkit-transform cubic-bezier(0.23, 1, 0.32, 1);
     -o-transition: 1s transform cubic-bezier(0.23, 1, 0.32, 1);
@@ -324,7 +314,7 @@ main .post-content .post-meta {
     cursor: pointer;
     position: relative;
     z-index: 99;
-    float: right;
+    float: left;
 }
 
 .burger:before, .burger span, .burger:after {
@@ -382,6 +372,7 @@ main .post-content .post-meta {
     -moz-transform: rotate(45deg);
     filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=5);
     /*for IE*/
+    background-color: black !important;
 }
 
 .burger.active:after {
@@ -389,6 +380,7 @@ main .post-content .post-meta {
     -moz-transform: rotate(-45deg);
     filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=-5);
     /*for IE*/
+    background-color: black !important;
 }
 
 .burger:focus {

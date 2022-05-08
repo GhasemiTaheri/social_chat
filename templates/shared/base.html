@@ -17,87 +17,84 @@
 
 </head>
 <body>
+<div class="container-fluid">
+    <div class="row">
+        <aside class="sidebar">
 
+            <div class="side-inner py-4">
+                <div class="toggle">
+                    <a href="#" class="burger js-menu-toggle" data-toggle="collapse" data-target="#main-navbar">
+                        <span></span>
+                    </a>
+                </div>
+                <div class="logo-wrap my-3">
+                    <div class="logo">
 
-<aside class="sidebar">
-    <div class="toggle">
-        <a href="#" class="burger js-menu-toggle" data-toggle="collapse" data-target="#main-navbar">
-            <span></span>
-        </a>
-    </div>
-    <div class="side-inner py-4">
-
-        <div class="logo-wrap mb-3">
-            <div class="logo">
-
-                {% if user.avatar %}
-                    <img style="width: 100%; height: 100%; border-radius: 50%" src="{{ profile.avatar.url }}">
-                {% else %}
-                    <span>
+                        {% if user.avatar %}
+                            <img style="width: 100%; height: 100%; border-radius: 50%" src="{{ profile.avatar.url }}">
+                        {% else %}
+                            <span>
                         {{ profile.username|make_list|first }}
                     </span>
+                        {% endif %}
+                    </div>
+                    <span class="logo-text">{{ profile.username }}</span>
+                </div>
+
+                {% if profile.bio %}
+                    <div class="bio-wrap px-4">
+                        <p style="text-align: center;">
+                            {{ profile.bio }}
+                        </p>
+                    </div>
                 {% endif %}
+
+                <div class="search-form">
+                    <form action="#">
+                        <span class="wrap-icon">
+                          <span class="bi bi-search" style="font-size: 15px;"></span>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Find people...">
+                    </form>
+                </div>
+
+                <div class="nav-menu">
+                    <ul>
+                        <li class="active">
+                            <a href="#" class="d-flex align-items-center"><i
+                                    class="bi bi-house-fill mr-3"></i><span class="menu-text">Home</span></a></li>
+
+                        <li><a href="#" class="d-flex align-items-center"><i
+                                class="bi bi-camera-video-fill mr-3"></i><span class="menu-text">Videos</span></a></li>
+
+                        <li><a href="#" class="d-flex align-items-center"><i class="bi bi-book-half mr-3"></i><span
+                                class="menu-text">Books</span></a></li>
+
+                        <li><a href="#" class="d-flex align-items-center"><i
+                                class="bi bi-cart-fill mr-3"></i><span class="menu-text">Store</span></a></li>
+
+                        <li><a href="#" class="d-flex align-items-center"><i
+                                class="bi bi-pie-chart-fill mr-3"></i><span class="menu-text">Analytics</span></a></li>
+
+                        <li><a href="#" class="d-flex align-items-center"><i class="bi bi-gear-fill mr-3"></i><span
+                                class="menu-text">Settings</span></a></li>
+
+                        <li><a href="{% url 'logout' %}" class="d-flex align-items-center"><i
+                                class="bi bi-box-arrow-left mr-3"></i><span
+                                class="menu-text">Logout</span></a></li>
+                    </ul>
+                </div>
             </div>
-            <span class="logo-text">{{ profile.username }}</span>
-        </div>
 
-        {% if profile.bio %}
-            <div class="bio-wrap px-4">
-                <p style="text-align: center;">
-                    {{ profile.bio }}
-                </p>
-            </div>
-        {% endif %}
+        </aside>
 
-        <div class="search-form">
-            <form action="#">
-            <span class="wrap-icon">
-              <span class="bi bi-search" style="font-size: 15px;"></span>
-            </span>
-                <input type="text" class="form-control" placeholder="Find people...">
-            </form>
-        </div>
 
-        <div class="nav-menu">
-            <ul>
-                <li class="active">
-                    <a href="#" class="d-flex align-items-center"><i
-                            class="bi bi-house-fill mr-3"></i><span class="menu-text">Home</span></a></li>
-
-                <li><a href="#" class="d-flex align-items-center"><i
-                        class="bi bi-camera-video-fill mr-3"></i><span class="menu-text">Videos</span></a></li>
-
-                <li><a href="#" class="d-flex align-items-center"><i class="bi bi-book-half mr-3"></i><span
-                        class="menu-text">Books</span></a></li>
-
-                <li><a href="#" class="d-flex align-items-center"><i
-                        class="bi bi-cart-fill mr-3"></i><span class="menu-text">Store</span></a></li>
-
-                <li><a href="#" class="d-flex align-items-center"><i
-                        class="bi bi-pie-chart-fill mr-3"></i><span class="menu-text">Analytics</span></a></li>
-
-                <li><a href="#" class="d-flex align-items-center"><i class="bi bi-gear-fill mr-3"></i><span
-                        class="menu-text">Settings</span></a></li>
-
-                <li><a href="{% url 'logout' %}" class="d-flex align-items-center"><i
-                        class="bi bi-box-arrow-left mr-3"></i><span
-                        class="menu-text">Logout</span></a></li>
-            </ul>
-        </div>
+        {#        <main>#}
+        {#        {% block body %}#}
+        {#        {% endblock %}#}
+        {#        </main>#}
     </div>
-
-</aside>
-
-<main>
-    <div class="site-section">
-        <div class="container">
-            <div class="row justify-content-center">
-                {% block body %}
-                {% endblock %}
-            </div>
-        </div>
-    </div>
-</main>
+</div>
 
 
 <!-- Load Script -->
