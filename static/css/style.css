@@ -172,15 +172,9 @@ aside .side-inner .bio-wrap {
 .show-sidebar aside .side-inner .bio-wrap {
     opacity: 1;
     display: block;
+    float: left;
 }
 
-
-/*.search-form {*/
-/*    padding-left: 20px;*/
-/*    padding-right: 20px;*/
-/*    clear: both;*/
-/*    margin-bottom: 30px;*/
-/*}*/
 
 .search-form form {
     position: relative;
@@ -190,16 +184,6 @@ aside .side-inner .bio-wrap {
     border-radius: 30px;
     border: 1px solid transparent;
     padding-left: 30px;
-}
-
-.search-form form .form-control:active,.search-form form .form-control:focus {
-    outline: none;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-}
-
-.search-form form .form-control {
-    border: 1px solid #efefef;
 }
 
 .search-form form .wrap-icon {
@@ -426,6 +410,7 @@ main .contact-content .post-meta {
     width: 100%;
     height: 100%;
 }
+
 .user_info {
     margin: auto 10px;
 }
