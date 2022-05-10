@@ -7,6 +7,6 @@ from django.shortcuts import render
 
 @login_required
 def dashboard(request):
-    return render(request, 'shared/dashborad.html', {
+    return render(request, 'chat/dashborad.html', {
         'profile': request.user
     })

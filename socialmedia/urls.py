@@ -14,12 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.contrib.auth.views import PasswordChangeView
+from django.urls import path, include, reverse_lazy
 from django.conf.urls.static import static
 from socialmedia import settings
 from django.contrib.auth import views as auth_views
 
-from user.views import register
+from user.views import register, CustomPasswordChangeView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -38,6 +39,11 @@ urlpatterns = [
     path('reset/done/',
          auth_views.PasswordResetCompleteView.as_view(template_name='password/password_reset_complete.html'),
          name='password_reset_complete'),
+
+    path('password/',
+         CustomPasswordChangeView.as_view(success_url=reverse_lazy('user:user_update'),
+                                          template_name='password/password-change.html'),
+         name='password_change'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

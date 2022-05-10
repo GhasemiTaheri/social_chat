@@ -1,0 +1,82 @@
+{% extends 'shared/base.html' %}
+
+{% block body %}
+
+    <div class="row h-100">
+        <div class="col-sm-4 border-right py-2 h-100">
+            <div class="search-form mb-4">
+                <form action="#">
+                        <span class="wrap-icon">
+                          <span class="bi bi-search" style="font-size: 15px;"></span>
+                        </span>
+                    <input type="text" class="form-control" placeholder="Find people...">
+                </form>
+            </div>
+            <div class="row" style="height: 55px;overflow: hidden;">
+                <div class="col-2 px-1 h-100">
+                    <div class="custom-thumbnail">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" alt="Image" class="img-fluid">
+                        {% else %}
+                            <div class="logo">
+                                <span>
+                                    {{ profile.username|make_list|first }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-10 py-1 h-100">
+                    <div class="contact-name">
+                        <h6 style="display: inline;">Mojtaba</h6>
+                        <small class="last-message-date" style="float: right;">17:50</small>
+                    </div>
+                    <div class="contact-content">
+                        <p>How the gut microbes How the gut microbes How the gut
+                            microbes How the gut microbes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8 d-none d-md-block px-0 h-100">
+            <div class="card h-100">
+                <div class="card-header msg_head">
+                    <div class="d-flex">
+                        <div class="img_cont">
+                            <div class="custom-thumbnail">
+                                {% if profile.avatar %}
+                                    <img src="{{ profile.avatar.url }}" alt="Image" class="img-fluid">
+                                {% else %}
+                                    <div class="logo">
+                                <span>
+                                    {{ profile.username|make_list|first }}
+                                </span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="user_info mx-4">
+                            <span>Chat with Khalid</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body msg_card_body">
+                </div>
+
+                <div class="card-footer">
+                    <div class="input-group">
+                            <textarea type="text" class="form-control message-text"
+                                      placeholder="Write your message"></textarea>
+                        <div class="input-group-append">
+                            <button class="btn" type="submit"><i class="bi bi-send send-button"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}

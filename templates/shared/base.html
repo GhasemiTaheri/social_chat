@@ -50,7 +50,7 @@
         <div class="nav-menu">
             <ul>
                 <li class="active">
-                    <a href="#" class="d-flex align-items-center"><i
+                    <a href="{% url 'chat:dashboard' %}" class="d-flex align-items-center"><i
                             class="bi bi-house-fill mr-3"></i><span class="menu-text">Home</span></a></li>
 
                 <li><a href="#" class="d-flex align-items-center"><i
@@ -65,7 +65,8 @@
                 <li><a href="#" class="d-flex align-items-center"><i
                         class="bi bi-pie-chart-fill mr-3"></i><span class="menu-text">Analytics</span></a></li>
 
-                <li><a href="#" class="d-flex align-items-center"><i class="bi bi-gear-fill mr-3"></i><span
+                <li><a href="{% url 'user:user_update' %}" class="d-flex align-items-center"><i
+                        class="bi bi-gear-fill mr-3"></i><span
                         class="menu-text">Settings</span></a></li>
 
                 <li><a href="{% url 'logout' %}" class="d-flex align-items-center"><i
@@ -77,8 +78,12 @@
 </aside>
 
 <main>
-    {% block chat %}
-    {% endblock %}
+    <div class="site-section h-100">
+        <div class="container-fluid h-100">
+            {% block body %}
+            {% endblock %}
+        </div>
+    </div>
 </main>
 
 <!-- Load Script -->

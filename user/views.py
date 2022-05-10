@@ -1,6 +1,9 @@
+import os
+from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.views import PasswordChangeView
 from django.core.mail import send_mail, BadHeaderError
 from django.db.models import Q
 from django.http import HttpResponse
@@ -8,11 +11,13 @@ from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from user.forms import UserRegisterForm
+from user.forms import UserRegisterForm, UpdateUserProfile
 from user.models import User
+from user.util import reset_pass_email
 
 
 def index(request):
@@ -51,26 +56,50 @@ def password_reset_request(request):
             associated_users = User.objects.filter(Q(email=data))
             if associated_users.exists():
                 for user in associated_users:
-                    subject = "Password Reset Requested"
-                    email_template_name = "password/password_reset_email.txt"
-                    c = {
-                        "email": user.email,
-                        'domain': '127.0.0.1:8000',
-                        'site_name': 'socialchat',
-                        "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-                        "user": user,
-                        'token': default_token_generator.make_token(user),
-                        'protocol': 'http',
-                    }
-                    email = render_to_string(email_template_name, c)
-                    try:
-                        send_mail(subject, email, 'admin@example.com', [user.email], fail_silently=False)
-                    except BadHeaderError:
-                        return HttpResponse('Invalid header found.')
-                    return redirect("/password_reset/done/")
+                    if reset_pass_email(user):
+                        return redirect("/password_reset/done/")
             else:
                 password_reset_form.add_error('email', 'Email does not exist!')
     else:
         password_reset_form = PasswordResetForm()
     return render(request=request, template_name="password/password_reset.html",
                   context={"password_reset_form": password_reset_form})
+
+
+def user_update(request):
+    # TODO: Complete remove avatar and replace feature
+    if request.method == "POST":
+        user_obj = User.objects.get(id=request.user.id)
+        user_form = UpdateUserProfile(request.POST, request.FILES, instance=user_obj)
+
+        if user_form.is_valid():
+
+            # remove user avatar from DISK
+            if request.FILES:
+                if request.user.avatar:
+                    if not user_form.cleaned_data['avatar']:
+                        os.remove(request.user.avatar.path)
+                user_obj.avatar = user_form.cleaned_data['avatar']
+            else:
+                if request.user.avatar:
+                    if not user_form.cleaned_data['avatar']:
+                        os.remove(request.user.avatar.path)
+
+            user_form.save()
+            messages.success(request, "Your information updated")
+            return redirect(reverse('user:user_update'))
+
+        messages.warning(request, "please try again")
+    else:
+        user_form = UpdateUserProfile(instance=User.objects.get(id=request.user.id))
+    return render(request, 'user/profile-update.html', {
+        'profile': request.user,
+        'form': user_form
+    })
+
+
+class CustomPasswordChangeView(PasswordChangeView):
+    def get_context_data(self, *args, **kwargs):
+        context = super(CustomPasswordChangeView, self).get_context_data(*args, **kwargs)
+        context['profile'] = self.request.user
+        return context
