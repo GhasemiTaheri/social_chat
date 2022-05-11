@@ -16,6 +16,7 @@ class Group(models.Model):
     unique_id = models.CharField(max_length=15, unique=True, default=code_generator)
     member = models.ManyToManyField(to=User, related_name="group_member")
     owner = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="group_creator")
+    avatar = models.ImageField(upload_to='group_avatar/', blank=True, null=True)
 
     def member_count(self):
         return self.member.count()

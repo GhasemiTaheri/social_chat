@@ -1,19 +1,14 @@
 import os
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordResetForm
-from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
-from django.core.mail import send_mail, BadHeaderError
 from django.db.models import Q
-from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
-# Create your views here.
-from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
 
 from user.forms import UserRegisterForm, UpdateUserProfile
 from user.models import User
@@ -66,8 +61,8 @@ def password_reset_request(request):
                   context={"password_reset_form": password_reset_form})
 
 
+@login_required
 def user_update(request):
-    # TODO: Complete remove avatar and replace feature
     if request.method == "POST":
         user_obj = User.objects.get(id=request.user.id)
         user_form = UpdateUserProfile(request.POST, request.FILES, instance=user_obj)
@@ -98,7 +93,7 @@ def user_update(request):
     })
 
 
-class CustomPasswordChangeView(PasswordChangeView):
+class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     def get_context_data(self, *args, **kwargs):
         context = super(CustomPasswordChangeView, self).get_context_data(*args, **kwargs)
         context['profile'] = self.request.user

@@ -4,4 +4,5 @@ from .views import *
 app_name = "chat"
 urlpatterns = [
     path('', dashboard, name="dashboard"),
+    path('create_group', create_group, name="create_group"),
 ]
