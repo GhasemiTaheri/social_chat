@@ -281,16 +281,17 @@ main .contact-entry {
     margin-bottom: 5px;
 }
 
-main .custom-thumbnail {
+.custom-thumbnail {
     width: 50px;
     height: 50px;
     margin: 0 auto;
 }
 
-main .custom-thumbnail img {
+.custom-thumbnail img {
     height: 100%;
     width: 100%;
     border-radius: 50%;
+    object-fit: cover;
 }
 
 main .contact-content p {
@@ -416,3 +417,14 @@ main .contact-content .post-meta {
 .user_info {
     margin: auto 10px;
 }
+
+.chat {
+    height: 60px;
+    overflow: hidden;
+}
+
+.chat:hover {
+    background-color: #e5e5e5;
+    cursor: pointer;
+}
+

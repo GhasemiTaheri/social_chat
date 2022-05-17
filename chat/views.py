@@ -1,15 +1,18 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from chat.forms import GroupCreate
+from chat.models import Group
 
 
 @login_required
 def dashboard(request):
     return render(request, 'chat/dashborad.html', {
-        'profile': request.user
+        'profile': request.user,
     })
 
 
@@ -22,7 +25,8 @@ def create_group(request):
             group_obj.owner = request.user
             group_obj.save()
             messages.success(request,
-                             f'Group Create successfully, send your invite link to your friends "http://127.0.0.1:8000/chat/{group_obj.unique_id}"')
+                             f'Group Create successfully, send your invite link to your friends '
+                             f'"http://127.0.0.1:8000/chat/{group_obj.unique_id}"')
         else:
             messages.error(request, "Name or image size may be has problem, please change it", extra_tags='danger')
 
@@ -33,3 +37,9 @@ def create_group(request):
         'profile': request.user,
         'group_form': create_group_form
     })
+
+
+@csrf_exempt
+def get_all_chat(request):
+    all_chat = Group.objects.filter(owner_id=request.user.id)
+    return JsonResponse([chats.serializer() for chats in all_chat], safe=False)

@@ -21,8 +21,25 @@ class Group(models.Model):
     def member_count(self):
         return self.member.count()
 
+    def last_message(self):
+        m = Message.objects.filter(to_group_id=self.id).last()
+        if m:
+            return m.serializer()
+
+    def serializer(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "unique_id": self.unique_id,
+            "member": [user.serializer() for user in self.member.all()],
+            "owner": self.owner.username,
+            "avatar": self.avatar.name,
+            "member_count": self.member_count(),
+            "last_message": self.last_message(),
+        }
+
     def __str__(self):
-        return self.unique_id
+        return f'{self.name} + {self.unique_id}'
 
 
 class Message(models.Model):
@@ -36,6 +53,15 @@ class Message(models.Model):
 
     def letter_count(self):
         return len(self.text)
+
+    def serializer(self):
+        return {
+            'sender': self.sender.serializer(),
+            'text': self.text,
+            'create_at': self.create_at,
+            'to_group': self.to_group.unique_id,
+            'to_user': self.to_user
+        }
 
     def __str__(self):
         return self.text
