@@ -5,11 +5,11 @@
     <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Sign into your
         account</h5>
 
-    {% if form.errors %}
-        <div class="alert alert-warning">
-            <p>Your username and password didn't match. Please try again.</p>
-        </div>
-    {% endif %}
+{#    {% if form.errors %}#}
+{#        <div class="alert alert-warning">#}
+{#            <p>Your username and password didn't match. Please try again.</p>#}
+{#        </div>#}
+{#    {% endif %}#}
 
     <form action="." method="post">
         {% csrf_token %}

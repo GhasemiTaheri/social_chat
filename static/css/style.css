@@ -404,7 +404,7 @@ main .contact-content .post-meta {
     cursor: pointer;
 }
 
-.img_cont {
+.img-cont {
     width: 50px;
     height: 50px;
 }
@@ -428,3 +428,71 @@ main .contact-content .post-meta {
     cursor: pointer;
 }
 
+.chat_list .active {
+    background-color: #e5e5e5;
+    border-left: 2px solid blueviolet;
+}
+
+.message {
+    background-color: #efefef;
+    position: absolute;
+}
+
+.text-wrapper {
+    background-color: #efefef;
+    border-radius: 5px;
+    padding: 8px;
+    overflow: auto;
+}
+
+.left-message .text-wrapper {
+    margin-left: 4.3rem;
+}
+
+.left-message {
+    position: relative;
+    width: 75%;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.left-message .text-wrapper:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid transparent;
+    border-right: 10px solid #efefef;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    left: 50px;
+}
+
+.right-message {
+    float: right;
+    position: relative;
+    width: 75%;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.right-message .text-wrapper {
+    background-color: skyblue;
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    overflow: auto;
+    margin-right: 20px;
+}
+
+.right-message .text-wrapper:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid skyblue;
+    border-right: 10px solid transparent;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    right: 0px;
+}
