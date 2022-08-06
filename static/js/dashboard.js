@@ -11,11 +11,14 @@ $(document).ready(function () {
             $('.chat').removeClass('active');
             $('#message_box_text').val('')
             socket.close();
+            setup_base_screen_width(true)
         }
     });
 
     get_all_chat();
+
 });
+
 
 function get_all_chat() {
     fetch('/chat/get_all_chat')
@@ -67,7 +70,6 @@ function get_chat_message(chat) {
         })
 
     if (socket) {
-        console.log('we close it')
         socket.close()
     }
     socket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + chat.dataset.chatid + '/');
@@ -78,8 +80,13 @@ function get_chat_message(chat) {
 
 }
 
+$(window).resize(function () {
+    setup_base_screen_width();
+});
 
 function setup_conversation(chat) {
+    setup_base_screen_width(false, true);
+
     $('.select-chat').removeClass('d-flex');
     $('.select-chat').addClass('d-none');
     $('.card').css('display', 'flex');
@@ -143,5 +150,24 @@ function send_message() {
     if (message_box.val().trim() !== "") {
         socket.send(JSON.stringify({'text': message_box.val()}))
         message_box.val('')
+    }
+}
+
+function setup_base_screen_width(back_btn = false, active_chat = false) {
+    if (window.matchMedia('(max-width: 767px)').matches && !back_btn) {
+        if ($('div.row .active').length >= 1 || active_chat) {
+            $('.chat_list').addClass('d-none')
+            $('.chat-content').removeClass('d-none')
+            $('.sidebar').addClass('d-none')
+            $('.site-section').css('padding-left', '0')
+            $('#back-to-chat-list').removeClass('d-none')
+        }
+    } else {
+        $('.chat_list').removeClass('d-none')
+        $('.chat-content').addClass('d-none')
+        $('.sidebar').removeClass('d-none')
+        $('.site-section').css('padding-left', '4.4rem')
+        $('#back-to-chat-list').addClass('d-none')
+        $('.chat').removeClass('active');
     }
 }

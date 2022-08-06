@@ -3,14 +3,18 @@
 {% block body %}
 
     <div class="row h-100">
-        <div class="col-md-4 chat_list border-right py-2 h-100">
-            <div class="search-form mb-4">
-                <form action="#">
+        <div class="col-md-4 chat_list border-right py-2 h-100" style="overflow-y: auto;">
+            <div class="row chat">
+                <div class="col">
+                    <div class="search-form mb-4">
+                        <form action="#">
                         <span class="wrap-icon">
                           <span class="bi bi-search" style="font-size: 15px;"></span>
                         </span>
-                    <input type="text" class="form-control" placeholder="Find people...">
-                </form>
+                            <input type="text" class="form-control" placeholder="Find people...">
+                        </form>
+                    </div>
+                </div>
             </div>
 
             {% if chat_rooms %}
@@ -45,10 +49,14 @@
 
         </div>
 
-        <div class="col-md-8 d-none d-md-block px-0 h-100">
+        <div class="col-md-8 d-none d-md-block px-0 h-100 chat-content">
             <div style="display: none" class="card h-100">
                 <div class="card-header msg_head">
                     <div class="d-flex">
+                        <h4 style="margin: auto 20px auto 0" id="back-to-chat-list" class="d-none"
+                            onclick="setup_base_screen_width(true)">
+                            <i class="bi bi-arrow-left"></i>
+                        </h4>
                         <div class="img-cont">
                             <div class="custom-thumbnail conversation_img">
                             </div>
