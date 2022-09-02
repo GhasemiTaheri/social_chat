@@ -1,18 +1,33 @@
 {% extends 'shared/base.html' %}
 {% load static %}
+{% block head %}
+    <!-- select2 css -->
+    <link href="{% static 'css/select2.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'js/select2.min.js' %}"></script>
+
+    <style>
+        .select2-selection__rendered {
+            line-height: 40px !important;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 40px !important;
+        }
+
+        .select2-selection__arrow {
+            height: 40px !important;
+        }
+    </style>
+
+{% endblock %}
 {% block body %}
 
     <div class="row h-100">
         <div class="col-md-4 chat_list border-right py-2 h-100" style="overflow-y: auto;">
             <div class="row chat">
                 <div class="col">
-                    <div class="search-form mb-4">
-                        <form action="#">
-                        <span class="wrap-icon">
-                          <span class="bi bi-search" style="font-size: 15px;"></span>
-                        </span>
-                            <input type="text" class="form-control" placeholder="Find people...">
-                        </form>
+                    <div class="search-form m-2">
+                        <select id="search_input"></select>
                     </div>
                 </div>
             </div>
@@ -99,5 +114,35 @@
 {% block script %}
     {{ profile.id|json_script:"uid" }}
     <script src="{% static 'js/dashboard.js' %}">
+    </script>
+    <script>
+        $(document).ready(function () {
+            function optionTemplate(state) {
+                if (state.id) {
+                    return $template = $(`<span><img class="mr-2" style='width:35px;height:35px;border-radius:55%;object-fit: cover;' src="/media/${state.avatar}"/>${state.name} </span>`)
+                }
+            }
+
+            $('#search_input').select2({
+                width: '100%',
+                placeholder: "Find group...",
+                templateResult: optionTemplate,
+                ajax: {
+                    url: "{% url 'chat:find_chat_room' %}",
+                    method: 'POST',
+                    data: function (params) {
+                        let query = {
+                            search: params.term,
+                        };
+                        return query;
+                    },
+                }
+            });
+
+            $('#search_input').on("select2:select", function (e) {
+                get_chat_message(e.params.data);
+            });
+
+        })
     </script>
 {% endblock %}

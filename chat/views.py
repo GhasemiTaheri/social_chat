@@ -1,9 +1,7 @@
-from itertools import chain
-from operator import attrgetter
+import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -53,3 +51,15 @@ def get_all_chat(request):
 def get_chat_message(request, chat_id):
     all_message = Message.objects.filter(to_group__unique_id=chat_id).order_by('create_at')
     return JsonResponse([message.serializer() for message in all_message], safe=False)
+
+
+@csrf_exempt
+def find_chat_room(request):
+    if request.method == 'POST':
+        term = request.POST.get('search')
+        if term:
+            filtered_group = Group.objects.filter(name__contains=term)
+            res = JsonResponse({'results': [group.serializer() for group in filtered_group]}, safe=False)
+            return res
+
+    return JsonResponse(json.dumps('Nothing'), safe=False)

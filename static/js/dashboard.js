@@ -62,8 +62,8 @@ function get_chat_message(chat) {
 
     $('.chat').removeClass('active');
     $(chat).addClass('active');
-
-    fetch(`get_chat_message/${chat.dataset.chatid}`)
+    const chat_id = chat.dataset ? chat.dataset.chatid : chat.unique_id;
+    fetch(`get_chat_message/${chat_id}`)
         .then(response => response.json())
         .then(data => {
             add_chat_to_message_box(data)
@@ -72,7 +72,7 @@ function get_chat_message(chat) {
     if (socket) {
         socket.close()
     }
-    socket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + chat.dataset.chatid + '/');
+    socket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + chat_id + '/');
     socket.onmessage = function (e) {
         let message = JSON.parse(e.data);
         add_chat_to_message_box(message, true);
@@ -93,10 +93,18 @@ function setup_conversation(chat) {
 
     $('.all-message').html("");
 
-    const chat_img = $(chat).children('.col-2').children().children('img').attr('src') !== undefined ? $(chat).children('.col-2').children().children('img').attr('src') : "";
-    const chat_name = $(chat).children('.col-10').children('.contact-name').children('h6').text();
+    let chat_img;
+    let chat_name;
+    if ($(chat).children().length > 0) {
+        chat_img = $(chat).children('.col-2').children().children('img').attr('src') !== undefined ? $(chat).children('.col-2').children().children('img').attr('src') : "";
+        chat_name = $(chat).children('.col-10').children('.contact-name').children('h6').text();
+    } else {
+        chat_img = "/media/" + chat.avatar
+        chat_name = chat.name
+    }
+
     $('.conversation_name').text(chat_name);
-    $('.member-count').text(chat.dataset.member + " member")
+    $('.member-count').text(chat.dataset ? chat.dataset.member + " member" : chat.member_count + " member")
 
     if (chat_img !== "")
         $('.conversation_img').html(`<img src="${chat_img}" alt="Image" class="img-fluid">`)
