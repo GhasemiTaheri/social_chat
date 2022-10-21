@@ -1,5 +1,7 @@
 var _udata;
 var socket;
+let active_chat_id;
+let chat_section = $('.chat_list');
 
 $(document).ready(function () {
     _udata = JSON.parse(document.getElementById('uid').textContent);
@@ -21,9 +23,11 @@ $(document).ready(function () {
 
 
 function get_all_chat() {
+    console.log('here')
     fetch('/chat/get_all_chat')
         .then(response => response.json())
         .then(data => {
+            chat_section.html('');
             for (let i in data) {
                 add_chat_to_dashboard(data[i])
             }
@@ -31,7 +35,7 @@ function get_all_chat() {
 }
 
 function add_chat_to_dashboard(d) {
-    let chat_section = $('.chat_list');
+
     chat_section.append(`<div onclick="get_chat_message(this)" data-chatid="${d['unique_id']}" data-member="${d['member_count']}" class="row chat border-bottom py-1">
                         <div class="col-2 px-1 h-100">
                             <div class="custom-thumbnail">
@@ -92,7 +96,7 @@ function setup_conversation(chat) {
     $('.card').css('display', 'flex');
 
     $('.all-message').html("");
-
+    active_chat_id = chat.dataset.chatid
     let chat_img;
     let chat_name;
     if ($(chat).children().length > 0) {
@@ -114,19 +118,30 @@ function setup_conversation(chat) {
 }
 
 function add_chat_to_message_box(message_obj, new_msg = false) {
-    for (let item in message_obj) {
-        const message = message_obj[item];
-        if (message.sender.id === _udata) {
-            $('.all-message').append(`<li class="right-message">
+    var audio = new Audio('https://androidzoom.ir/wp-content/uploads/2018/05/FadeIn.mp3');
+    const action_message = message_obj.hasOwnProperty('type')
+    if (action_message) {
+        if (message_obj.type === 'left')
+            alert(`${message_obj.user} left the group`)
+        if (message_obj.type === "delete")
+            alert(`Admin delete the group`)
+
+
+        audio.play();
+    } else {
+        for (let item in message_obj) {
+            const message = message_obj[item];
+            if (message.sender.id === _udata) {
+                $('.all-message').append(`<li class="right-message">
                             <div class="text-wrapper">
                                 <div>#MESSAGE#<br></div>
                                 <div class="float-right"><small>#TIME#</small></div>
                             </div>
                         </li>`
-                .replace('#MESSAGE#', message.text)
-                .replace('#TIME#', new Date(message.create_at).toLocaleString()));
-        } else {
-            $('.all-message').append(`<li class="left-message">
+                    .replace('#MESSAGE#', message.text)
+                    .replace('#TIME#', new Date(message.create_at).toLocaleString()));
+            } else {
+                $('.all-message').append(`<li class="left-message">
                             <div class="custom-thumbnail float-left">#AVATAR#</div>
                             <div class="text-wrapper">
                                 <div><small>#NAME#</small><br></div>
@@ -134,19 +149,16 @@ function add_chat_to_message_box(message_obj, new_msg = false) {
                                 <div class="float-right"><small>#TIME#</small></div>
                             </div>
                         </li>`
-                .replace("#AVATAR#", message.sender.avatar !== "" ? `<img src="/media/${message.sender.avatar}">` : `<div class="logo m-0"><span>${message.sender.username[0]}</span></div>`)
-                .replace('#NAME#', message.sender.first_name !== "" ? message.sender.first_name : message.sender.username)
-                .replace('#MESSAGE#', message.text)
-                .replace('#TIME#', new Date(message.create_at).toLocaleString()));
+                    .replace("#AVATAR#", message.sender.avatar !== "" ? `<img src="/media/${message.sender.avatar}">` : `<div class="logo m-0"><span>${message.sender.username[0]}</span></div>`)
+                    .replace('#NAME#', message.sender.first_name !== "" ? message.sender.first_name : message.sender.username)
+                    .replace('#MESSAGE#', message.text)
+                    .replace('#TIME#', new Date(message.create_at).toLocaleString()));
 
-            if (new_msg) {
-                var audio = new Audio('https://androidzoom.ir/wp-content/uploads/2018/05/FadeIn.mp3');
-                audio.play();
+                if (new_msg)
+                    audio.play();
             }
+            $('.active .contact-content p').text(message.text.substr(0, 15) + '...');
         }
-
-        $('.active .contact-content p').text(message.text.substr(0, 15) + '...');
-
     }
 
     $('.msg_card_body').scrollTop($('.msg_card_body').prop("scrollHeight"));
@@ -178,4 +190,41 @@ function setup_base_screen_width(back_btn = false, active_chat = false) {
         $('#back-to-chat-list').addClass('d-none')
         $('.chat').removeClass('active');
     }
+}
+
+function showMoreMenu() {
+    $('#myDropdown').toggleClass("show");
+    $(window).click((event) => {
+        if (!event.target.matches('.dropbtn')) {
+            const dropdowns = $('.dropdown-content')
+            let i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if ($(openDropdown).hasClass('show')) {
+                    $(openDropdown).removeClass('show');
+                }
+            }
+        }
+    })
+}
+
+function leaveGroup() {
+    fetch(`/chat/leave_group/${active_chat_id}`)
+        .then(response => response.json())
+        .then(data => {
+            get_all_chat()
+        })
+}
+
+function join_to_group(chat_id) {
+    $.ajax(`/chat/join`, {
+        method: 'POST',
+        data: {'chat_id': chat_id},
+        success: (data) => {
+            get_all_chat()
+        },
+        error: (data) => {
+            console.log(data)
+        }
+    })
 }

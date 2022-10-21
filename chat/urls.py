@@ -8,4 +8,6 @@ urlpatterns = [
     path('get_all_chat', get_all_chat, name="get_all_chat"),
     path('get_chat_message/<str:chat_id>', get_chat_message, name="get_chat_message"),
     path('find_chat_room', find_chat_room, name="find_chat_room"),
+    path('leave_group/<str:chat_id>', leave_group, name="leave_group"),
+    path('join', join_group, name="join"),
 ]

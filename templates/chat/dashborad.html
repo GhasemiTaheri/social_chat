@@ -23,7 +23,7 @@
 {% block body %}
 
     <div class="row h-100">
-        <div class="col-md-4 chat_list border-right py-2 h-100" style="overflow-y: auto;">
+        <div class="col-md-4 border-right py-2 h-100" style="overflow-y: auto;">
             <div class="row chat">
                 <div class="col">
                     <div class="search-form m-2">
@@ -31,7 +31,7 @@
                     </div>
                 </div>
             </div>
-
+            <div class="chat_list">
             {% if chat_rooms %}
                 {% for chat in chat_rooms %}
                     <div class="row chat border-bottom py-1">
@@ -61,7 +61,7 @@
                     </div>
                 {% endfor %}
             {% endif %}
-
+            </div>
         </div>
 
         <div class="col-md-8 d-none d-md-block px-0 h-100 chat-content">
@@ -80,6 +80,14 @@
                             <span class="conversation_name"></span>
                             <br>
                             <small class="member-count"></small>
+                        </div>
+                        <h4 style="margin: auto 0 auto auto;">
+                            <i onclick="showMoreMenu()" class="dropbtn bi bi-three-dots-vertical"></i>
+                        </h4>
+                    </div>
+                    <div class="dropdown">
+                        <div id="myDropdown" class="dropdown-content">
+                            <a onclick="leaveGroup()">Leave Group</a>
                         </div>
                     </div>
                 </div>
@@ -118,8 +126,12 @@
     <script>
         $(document).ready(function () {
             function optionTemplate(state) {
+                console.log('abbas', state)
                 if (state.id) {
-                    return $template = $(`<span><img class="mr-2" style='width:35px;height:35px;border-radius:55%;object-fit: cover;' src="/media/${state.avatar}"/>${state.name} </span>`)
+                    return $template = $(`<span>
+                    <img class="mr-2" id="select2-item" src="/media/${state.avatar}"/>${state.name}
+                    <button type="button" class="btn btn-success btn-sm float-right">join</button>
+                    </span>`)
                 }
             }
 
@@ -140,7 +152,8 @@
             });
 
             $('#search_input').on("select2:select", function (e) {
-                get_chat_message(e.params.data);
+                {#console.log(e)#}
+                join_to_group(e.params.data.unique_id);
             });
 
         })

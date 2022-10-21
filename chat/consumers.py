@@ -4,23 +4,6 @@ import json
 from channels.db import database_sync_to_async
 from chat.models import Group, Message
 
-from channels.generic.websocket import WebsocketConsumer
-
-
-# class ChatConsumer(WebsocketConsumer):
-#     def connect(self):
-#         self.accept()
-#
-#     def disconnect(self, close_code):
-#         pass
-#
-#     def receive(self, text_data):
-#         text_data_json = json.loads(text_data)
-#         message = text_data_json['text']
-#
-#         self.send(text_data=json.dumps({
-#             'message': message
-#         }))
 
 class ChatConsumer(AsyncConsumer):
     async def websocket_connect(self, event):
@@ -57,27 +40,17 @@ class ChatConsumer(AsyncConsumer):
             text = text_data_json['text']
 
             msg = await self.create_message(text)
-
-            await self.channel_layer.group_send(
-                self.chat_room_id,
-                {
-                    'type': 'chat_message',
-                    'message': msg,
-                    'sender_channel_name': self.channel_name
-                }
-            )
+            if msg:
+                await self.channel_layer.group_send(
+                    self.chat_room_id,
+                    {
+                        'type': 'chat_message',
+                        'message': msg,
+                        'sender_channel_name': self.channel_name
+                    }
+                )
 
     async def chat_message(self, event):
-        message = event['message']
-
-        # if self.channel_name != event['sender_channel_name']:
-        #     print('sdfdsf')
-        await self.send({
-            'type': 'websocket.send',
-            'text': message
-        })
-
-    async def chat_activity(self, event):
         message = event['message']
 
         await self.send({
@@ -95,6 +68,8 @@ class ChatConsumer(AsyncConsumer):
 
     @database_sync_to_async
     def create_message(self, text):
-        msg_obj = Message.objects.create(to_group_id=self.chat.id, sender_id=self.user.id, text=text)
-        j = msg_obj.serializer()
-        return json.dumps([j], default=str)
+        if self.chat.owner == self.user or self.chat.member.filter(id=self.user.id).exists():
+            msg_obj = Message.objects.create(to_group_id=self.chat.id, sender_id=self.user.id, text=text)
+            j = msg_obj.serializer()
+            return json.dumps([j], default=str)
+        return None
