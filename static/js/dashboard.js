@@ -23,7 +23,6 @@ $(document).ready(function () {
 
 
 function get_all_chat() {
-    console.log('here')
     fetch('/chat/get_all_chat')
         .then(response => response.json())
         .then(data => {
@@ -174,8 +173,10 @@ function send_message() {
 }
 
 function setup_base_screen_width(back_btn = false, active_chat = false) {
+    console.log('jesus')
     if (window.matchMedia('(max-width: 767px)').matches && !back_btn) {
         if ($('div.row .active').length >= 1 || active_chat) {
+            $('.chat_section').addClass('d-none')
             $('.chat_list').addClass('d-none')
             $('.chat-content').removeClass('d-none')
             $('.sidebar').addClass('d-none')
@@ -183,6 +184,7 @@ function setup_base_screen_width(back_btn = false, active_chat = false) {
             $('#back-to-chat-list').removeClass('d-none')
         }
     } else {
+        $('.chat_section').removeClass('d-none')
         $('.chat_list').removeClass('d-none')
         $('.chat-content').addClass('d-none')
         $('.sidebar').removeClass('d-none')
@@ -220,7 +222,7 @@ function join_to_group(chat_id) {
     $.ajax(`/chat/join`, {
         method: 'POST',
         data: {'chat_id': chat_id},
-        success: (data) => {
+        success: () => {
             get_all_chat()
         },
         error: (data) => {
