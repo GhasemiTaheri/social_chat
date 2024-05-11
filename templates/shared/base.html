@@ -28,7 +28,6 @@
         </div>
         <div class="logo-wrap my-3">
             <div class="logo">
-
                 {% if user.avatar %}
                     <div class="custom-thumbnail">
                         <img src="{{ profile.avatar.url }}">
@@ -56,8 +55,12 @@
                     <a href="{% url 'chat:dashboard' %}" class="d-flex align-items-center"><i
                             class="bi bi-house-fill mr-3"></i><span class="menu-text">Home</span></a></li>
 
-                <li><a href="{% url 'chat:create_group' %}" class="d-flex align-items-center"><i
-                        class="bi bi-people-fill mr-3"></i><span class="menu-text">New Group</span></a></li>
+                <li>
+                    <a href="#" class="d-flex align-items-center">
+                        <i class="bi bi-people-fill mr-3"></i>
+                        <span class="menu-text">New Group</span>
+                    </a>
+                </li>
 
                 <li><a href="{% url 'user:user_update' %}" class="d-flex align-items-center"><i
                         class="bi bi-gear-fill mr-3"></i><span

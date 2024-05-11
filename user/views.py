@@ -1,14 +1,12 @@
-import os
-from django.contrib import messages
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.db.models import Q
 from django.shortcuts import render, redirect
 
-from django.urls import reverse
+from django.urls import reverse_lazy
+from django.views.generic import UpdateView
 
 from user.forms import UserRegisterForm, UpdateUserProfile
 from user.models import User
@@ -57,37 +55,46 @@ def password_reset_request(request):
                   context={"password_reset_form": password_reset_form})
 
 
-@login_required
-def user_update(request):
-    if request.method == "POST":
-        user_obj = User.objects.get(id=request.user.id)
-        user_form = UpdateUserProfile(request.POST, request.FILES, instance=user_obj)
+class UserUpdateView(LoginRequiredMixin, UpdateView):
+    form_class = UpdateUserProfile
+    template_name = 'user/profile-update.html'
+    success_url = reverse_lazy('chat:dashboard')
 
-        if user_form.is_valid():
+    def get_object(self, queryset=None):
+        return self.request.user
 
-            # remove user avatar from DISK
-            if request.FILES:
-                if request.user.avatar:
-                    if not user_form.cleaned_data['avatar']:
-                        os.remove(request.user.avatar.path)
-                user_obj.avatar = user_form.cleaned_data['avatar']
-            else:
-                if request.user.avatar:
-                    if not user_form.cleaned_data['avatar']:
-                        os.remove(request.user.avatar.path)
 
-            user_form.save()
-            messages.success(request, "Your information updated")
-            return redirect(reverse('user:user_update'))
-
-        messages.warning(request, "please try again")
-    else:
-        user_form = UpdateUserProfile(instance=User.objects.get(id=request.user.id))
-    return render(request, 'user/profile-update.html', {
-        'profile': request.user,
-        'form': user_form
-    })
-
+# @login_required
+# def user_update(request):
+#     if request.method == "POST":
+#         user_obj = User.objects.get(id=request.user.id)
+#         user_form = UpdateUserProfile(request.POST, request.FILES, instance=user_obj)
+#
+#         if user_form.is_valid():
+#
+#             # remove user avatar from DISK
+#             if request.FILES:
+#                 if request.user.avatar:
+#                     if not user_form.cleaned_data['avatar']:
+#                         os.remove(request.user.avatar.path)
+#                 user_obj.avatar = user_form.cleaned_data['avatar']
+#             else:
+#                 if request.user.avatar:
+#                     if not user_form.cleaned_data['avatar']:
+#                         os.remove(request.user.avatar.path)
+#
+#             user_form.save()
+#             messages.success(request, "Your information updated")
+#             return redirect(reverse('user:user_update'))
+#
+#         messages.warning(request, "please try again")
+#     else:
+#         user_form = UpdateUserProfile(instance=User.objects.get(id=request.user.id))
+#     return render(request, 'user/profile-update.html', {
+#         'profile': request.user,
+#         'form': user_form
+#     })
+#
 
 class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     def get_context_data(self, *args, **kwargs):

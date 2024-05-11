@@ -23,6 +23,7 @@
 {% block body %}
 
     <div class="row h-100">
+    
         <div class="col-md-4 border-right py-2 h-100 chat_section" style="overflow-y: auto;">
             <div class="row chat">
                 <div class="col">
@@ -140,7 +141,7 @@
                 placeholder: "Find group...",
                 templateResult: optionTemplate,
                 ajax: {
-                    url: "{% url 'chat:find_chat_room' %}",
+                    url: "#",
                     method: 'POST',
                     data: function (params) {
                         let query = {
