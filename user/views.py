@@ -15,10 +15,6 @@ from user.models import User
 from user.util import reset_pass_email
 
 
-def index(request):
-    return render(request, 'user/landing.html')
-
-
 def register(request):
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
@@ -57,7 +53,7 @@ def password_reset_request(request):
                 password_reset_form.add_error('email', 'Email does not exist!')
     else:
         password_reset_form = PasswordResetForm()
-    return render(request=request, template_name="password/password_reset.html",
+    return render(request=request, template_name="registration/password_reset.html",
                   context={"password_reset_form": password_reset_form})
 
 

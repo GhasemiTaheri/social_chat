@@ -1,7 +1,6 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse
-from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -9,7 +8,7 @@ from django.utils.http import urlsafe_base64_encode
 
 def reset_pass_email(user):
     subject = "Password Reset Requested"
-    email_template_name = "password/password_reset_email.txt"
+    email_template_name = "registration/password_reset_email.txt"
     c = {
         "email": user.email,
         'domain': '127.0.0.1:8000',
