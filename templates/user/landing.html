@@ -22,7 +22,7 @@
 <!-- Navigation-->
 <nav class="navbar navbar-light bg-light static-top">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'user:index' %}">Social Chat</a>
+        <a class="navbar-brand" href="{% url 'index' %}">Social Chat</a>
         {% if user.is_authenticated %}
             <div>
                 <a class="btn btn-success" href="{% url 'chat:dashboard' %}">Dashboard</a>
