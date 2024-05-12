@@ -1,6 +1,18 @@
 from django.contrib import admin
 
-# Register your models here.
-from chat.models import Message
+from chat.models import Message, GroupConversation, PrivateConversation
 
 admin.site.register(Message)
+
+
+@admin.register(GroupConversation)
+class GroupChatAdmin(admin.ModelAdmin):
+    list_display = ('title', 'member_count')
+    search_fields = ('title',)
+    # todo: change form field and set default for conversation_type and add inline 10 last message
+
+
+@admin.register(PrivateConversation)
+class PrivateChatAdmin(admin.ModelAdmin):
+    list_display = ('title', 'participants')
+    # todo: change form field and set default for conversation_type and add inline 10 last message
