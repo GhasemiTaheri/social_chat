@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
 from django.urls import reverse
@@ -12,20 +14,6 @@ class UserRegisterForm(UserCreationForm):
 
     username = forms.CharField(required=True)
     email = forms.EmailField(required=True)
-
-    # TODO: optimize clean_email func
-    def clean_email(self):
-        exists = None
-        email = self.cleaned_data.get("email")
-        try:
-            exists = User.objects.filter(email=email)
-        except:
-            pass
-
-        if exists:
-            raise forms.ValidationError("A user with that username already exists.")
-        else:
-            return email
 
 
 class UpdateUserProfile(UserChangeForm):
@@ -54,3 +42,13 @@ class UpdateUserProfile(UserChangeForm):
             if pic.size > 1000000:
                 raise forms.ValidationError("Image size is too large, please select another image")
         return pic
+
+    def save(self, commit=True):
+        try:
+            if self.data.get('avatar-clear', False):
+                if os.path.exists(self.initial.get('avatar').path):
+                    os.remove(self.initial.get('avatar').path)
+        except Exception as e:
+            print(e)
+
+        return super().save(commit)
