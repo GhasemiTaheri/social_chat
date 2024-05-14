@@ -17,6 +17,7 @@ DEBUG = env('DEBUG')
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
+    "daphne",
     'channels',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -24,7 +25,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 3rd
     'crispy_forms',
+    'rest_framework',
     # local apps
     'chat',
     'user',
@@ -127,3 +130,15 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 #
 # EMAIL_HOST_USER = "Email"
 # EMAIL_HOST_PASSWORD = "pass"
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
+}
