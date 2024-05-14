@@ -1,7 +1,8 @@
 from django.contrib import admin
 
-from chat.models import Message, GroupConversation, PrivateConversation
+from chat.models import Message, GroupConversation, PrivateConversation, Participant
 
+admin.site.register(Participant)
 admin.site.register(Message)
 
 
