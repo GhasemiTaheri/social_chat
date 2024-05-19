@@ -1,8 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Max
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView
+from rest_framework import viewsets
 
 from chat.forms import ConversationCreateForm
+from chat.models import Conversation
+from chat.serializers import ConversationSerializer
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -18,3 +22,14 @@ class GroupCreateView(LoginRequiredMixin, CreateView):
         kwargs = super(GroupCreateView, self).get_form_kwargs()
         kwargs.update({'request': self.request})
         return kwargs
+
+
+class ConversationViewSet(viewsets.ModelViewSet):
+    serializer_class = ConversationSerializer
+
+    def get_queryset(self):
+        current_user = self.request.user
+        return (Conversation.objects.filter(participant__user_id=current_user.id)
+                .annotate(last_message_date=Max('message__create_at'))
+                .distinct()
+                .order_by('-last_message_date'))
