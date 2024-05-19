@@ -1,37 +1,26 @@
-var _udata;
-var socket;
+import {ConversationManagement} from "./ConversationManagement.js";
+
+const _udata = 1;
 let active_chat_id;
-let chat_section = $('.chat_list');
+const chat_section = $('.chat_list');
 
-$(document).ready(function () {
-    _udata = JSON.parse(document.getElementById('uid').textContent);
-    $(document).keydown(function (e) {
-        if (e.key === "Escape" || e.key === "Esc") {
-            $('.select-chat').removeClass('d-none');
-            $('.select-chat').addClass('d-flex');
-            $('.card').css('display', 'none');
-            $('.chat').removeClass('active');
-            $('#message_box_text').val('')
-            socket.close();
-            setup_base_screen_width(true)
-        }
-    });
-
-    get_all_chat();
-
+$(document).ready(() => {
+    // _udata = JSON.parse(document.getElementById('uid').textContent);
+    // $(document).keydown(function (e) {
+    //     if (e.key === "Escape" || e.key === "Esc") {
+    //         $('.select-chat').removeClass('d-none');
+    //         $('.select-chat').addClass('d-flex');
+    //         $('.card').css('display', 'none');
+    //         $('.chat').removeClass('active');
+    //         $('#message_box_text').val('')
+    //         socket.close();
+    //         setup_base_screen_width(true)
+    //     }
+    // });
+    const conManager = new ConversationManagement(".chat_id");
+    conManager.getAllConversation();
 });
 
-
-function get_all_chat() {
-    fetch('/chat/get_all_chat')
-        .then(response => response.json())
-        .then(data => {
-            chat_section.html('');
-            for (let i in data) {
-                add_chat_to_dashboard(data[i])
-            }
-        })
-}
 
 function add_chat_to_dashboard(d) {
 
@@ -173,7 +162,6 @@ function send_message() {
 }
 
 function setup_base_screen_width(back_btn = false, active_chat = false) {
-    console.log('jesus')
     if (window.matchMedia('(max-width: 767px)').matches && !back_btn) {
         if ($('div.row .active').length >= 1 || active_chat) {
             $('.chat_section').addClass('d-none')

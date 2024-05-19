@@ -18,12 +18,10 @@
             height: 40px !important;
         }
     </style>
-
 {% endblock %}
 {% block body %}
 
     <div class="row h-100">
-    
         <div class="col-md-4 border-right py-2 h-100 chat_section" style="overflow-y: auto;">
             <div class="row chat">
                 <div class="col">
@@ -33,35 +31,6 @@
                 </div>
             </div>
             <div class="chat_list">
-            {% if chat_rooms %}
-                {% for chat in chat_rooms %}
-                    <div class="row chat border-bottom py-1">
-                        <div class="col-2 px-1 h-100">
-                            <div class="custom-thumbnail">
-                                {% if chat.avatar %}
-                                    <img src="{{ chat.avatar.url }}" alt="Image" class="img-fluid">
-                                {% else %}
-                                    <div class="logo m-0">
-                                <span>
-                                    {{ chat.name|make_list|first }}
-                                </span>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-10 py-1 h-100">
-                            <div class="contact-name">
-                                <h6 style="display: inline;">{{ chat.name }}</h6>
-                                <small class="last-message-date"
-                                       style="float: right;">{{ chat.last_message.create_at.time }}</small>
-                            </div>
-                            <div class="contact-content">
-                                <p>{{ chat.last_message.text }}</p>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
             </div>
         </div>
 
@@ -95,7 +64,6 @@
 
                 <div class="card-body msg_card_body" style="overflow-y: scroll">
                     <ul class="p-0 h-100 all-message" style="list-style: none">
-
                     </ul>
                 </div>
 
@@ -116,30 +84,25 @@
                 <h6 class="rounded p-1" style="background-color: #c5c5c578;">Select a Chat!</h6>
             </div>
         </div>
-
     </div>
 
 {% endblock %}
 {% block script %}
-    {{ profile.id|json_script:"uid" }}
-    <script src="{% static 'js/dashboard.js' %}">
-    </script>
+    <script src="{% static 'js/WsConnector.js' %}"></script>
+    <script type="module" src="{% static 'js/dashboard.js' %}"></script>
     <script>
         $(document).ready(function () {
-            function optionTemplate(state) {
-                console.log('abbas', state)
-                if (state.id) {
-                    return $template = $(`<span>
-                    <img class="mr-2" id="select2-item" src="/media/${state.avatar}"/>${state.name}
-                    <button type="button" class="btn btn-success btn-sm float-right">join</button>
-                    </span>`)
-                }
-            }
-
             $('#search_input').select2({
                 width: '100%',
                 placeholder: "Find group...",
-                templateResult: optionTemplate,
+                templateResult: (state) => {
+                    if (state.id) {
+                        return $template = $(`<span>
+                        <img class="mr-2" id="select2-item" src="/media/${state.avatar}"/>${state.name}
+                        <button type="button" class="btn btn-success btn-sm float-right">join</button>
+                        </span>`)
+                    }
+                },
                 ajax: {
                     url: "#",
                     method: 'POST',
@@ -153,10 +116,9 @@
             });
 
             $('#search_input').on("select2:select", function (e) {
-                {#console.log(e)#}
+                console.log(e)
                 join_to_group(e.params.data.unique_id);
             });
-
         })
     </script>
 {% endblock %}
