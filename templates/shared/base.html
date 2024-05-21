@@ -1,96 +1,43 @@
 {% load static %}
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
+    <title>Swipe – The Simplest Chat Platform</title>
+    <meta name="description" content="#">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-
-    <!-- Style -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-    <title>Messenger</title>
-    {% block head %}
-    {% endblock %}
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" type="text/css" rel="stylesheet">
+    <!-- Swipe core CSS -->
+    <link href="{% static 'css/swipe.min.css' %}" type="text/css" rel="stylesheet">
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}"/>
 </head>
 <body>
-
-<aside class="sidebar">
-    <div class="side-inner py-4">
-        <div class="toggle">
-            <a href="#" class="burger js-menu-toggle" data-toggle="collapse" data-target="#main-navbar">
-                <span></span>
-            </a>
-        </div>
-        <div class="logo-wrap my-3">
-            <div class="logo">
-                {% if user.avatar %}
-                    <div class="custom-thumbnail">
-                        <img src="{{ user.avatar.url }}">
-                    </div>
-                {% else %}
-                    <span>
-                        {{ profile.username|make_list|first }}
-                    </span>
-                {% endif %}
-            </div>
-            <span class="logo-text">{{ profile.username }}</span>
-        </div>
-
-        {% if profile.bio %}
-            <div class="bio-wrap px-4">
-                <p style="text-align: center;">
-                    {{ profile.bio }}
-                </p>
-            </div>
-        {% endif %}
-
-        <div class="nav-menu">
-            <ul>
-                <li class="active">
-                    <a href="{% url 'chat:dashboard' %}" class="d-flex align-items-center"><i
-                            class="bi bi-house-fill mr-3"></i><span class="menu-text">Home</span></a></li>
-
-                <li>
-                    <a href="{% url 'chat:new_group' %}" class="d-flex align-items-center">
-                        <i class="bi bi-people-fill mr-3"></i>
-                        <span class="menu-text">New Group</span>
-                    </a>
-                </li>
-
-                <li><a href="{% url 'user:user_update' %}" class="d-flex align-items-center"><i
-                        class="bi bi-gear-fill mr-3"></i><span
-                        class="menu-text">Settings</span></a></li>
-
-                <li><a href="{% url 'logout' %}" class="d-flex align-items-center"><i
-                        class="bi bi-box-arrow-left mr-3"></i><span
-                        class="menu-text">Logout</span></a></li>
-            </ul>
-        </div>
-    </div>
-</aside>
-
 <main>
-    <div class="site-section h-100">
-        <div class="container-fluid h-100">
-            {% block body %}
-            {% endblock %}
-        </div>
+    <div class="layout">
+        {% include 'shared/navigation.html' %}
+        {% include 'shared/sidebar.html' %}
+
+        {% block body %}
+        {% endblock %}
     </div>
 </main>
 
-<!-- Load Script -->
-<script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-<script src="{% static 'js/bootstrap.min.js' %}"></script>
-<script src="{% static 'js/main.js' %}"></script>
-<script src="{% static 'js/select2.min.js' %}"></script>
+<script src="{% static 'js/jquery-slim.min.js' %}"></script>
 
-{% block script %}
-{% endblock %}
+<script src="{% static 'js/popper.min.js' %}"></script>
+<script src="{% static 'js/swipe.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script>
+    function scrollToBottom(el) {
+        el.scrollTop = el.scrollHeight;
+    }
+
+    scrollToBottom(document.getElementById('content'));
+</script>
 
 </body>
 </html>

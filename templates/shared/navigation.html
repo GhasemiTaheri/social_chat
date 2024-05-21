@@ -1,0 +1,24 @@
+<!-- Start of Navigation -->
+<div class="navigation">
+    <div class="container">
+        <div class="inside">
+            <div class="nav nav-tab menu">
+
+                <button class="btn">
+                    <img class="avatar-xl"
+                         src="{{ user.get_avatar }}"
+                         alt="avatar">
+                </button>
+                <a href="#discussions" data-toggle="tab" class="active">
+                    <i class="material-icons active">chat_bubble_outline</i>
+                </a>
+
+                <a href="#settings" data-toggle="tab"><i class="material-icons">settings</i></a>
+                <a class="btn power" href="{% url 'logout' %}">
+                    <i class="material-icons">power_settings_new</i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End of Navigation -->

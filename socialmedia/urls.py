@@ -12,7 +12,7 @@ urlpatterns = [
     path('', include('django.contrib.auth.urls')),
 
     # local urls
-    path('', TemplateView.as_view(template_name='user/landing.html'), name="index"),
+    path('', TemplateView.as_view(template_name='landing.html'), name="index"),
     path('profile/', include('user.urls')),
     path('chat/', include('chat.urls')),
 ]
