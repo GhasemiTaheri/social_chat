@@ -3,7 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.urls import reverse_lazy
 from django.views.generic import FormView, CreateView
-from rest_framework.generics import UpdateAPIView
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import UpdateModelMixin, DestroyModelMixin
 
 from user.forms import UserRegisterForm
 from user.serializers import UserUpdateSerializer
@@ -25,7 +26,7 @@ class PasswordResetView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
 
-class UserUpdateApiView(UpdateAPIView):
+class UserUpdateDestroyApiView(UpdateModelMixin, DestroyModelMixin, GenericAPIView):
     serializer_class = UserUpdateSerializer
 
     def get_object(self):

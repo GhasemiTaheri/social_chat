@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import Q
 from django.utils.functional import cached_property
 
 
@@ -13,3 +14,19 @@ class User(AbstractUser):
             return self.avatar.url
         else:
             return self.avatar.storage.url('defaults/user_default.jpg')
+
+    @cached_property
+    def get_statics(self):
+        """
+        This property extracts user information to be used in the template.
+        """
+        from chat.models import Participant
+        user_conversations = self.participant_set.values('conversation_id')
+        result = {
+            'message_count': self.message_set.count(),
+            'conversation_count': user_conversations.count(),
+            'friends_count': Participant.objects.filter(Q(conversation_id__in=user_conversations)
+                                                        & ~Q(user_id=self.id)).count()
+        }
+
+        return result

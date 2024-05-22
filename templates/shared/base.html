@@ -78,5 +78,27 @@
         });
     });
 </script>
+<script>
+    $('#collapseSeven').on('click', (e) => {
+        const csrf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+
+        if (confirm('Would you like to delete your account?\r\nWith this, your information will no longer be accessible.') === true) {
+            $.ajax({
+                headers: {
+                    'X-CSRFToken': csrf_token,
+                },
+                url: '{% url 'user:user_update' %}',
+                method: 'delete',
+                success: () => {
+                    window.location.reload();
+                },
+                error: (e) => {
+                    console.log(e)
+                }
+            });
+        } else
+            console.log('No')
+    })
+</script>
 </body>
 </html>
