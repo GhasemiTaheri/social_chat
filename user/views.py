@@ -2,9 +2,11 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.urls import reverse_lazy
-from django.views.generic import UpdateView, FormView, CreateView
+from django.views.generic import FormView, CreateView
+from rest_framework.generics import UpdateAPIView
 
-from user.forms import UserRegisterForm, UpdateUserProfile
+from user.forms import UserRegisterForm
+from user.serializers import UserUpdateSerializer
 
 
 class SignUpView(CreateView):
@@ -23,10 +25,8 @@ class PasswordResetView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
 
-class UserUpdateView(LoginRequiredMixin, UpdateView):
-    form_class = UpdateUserProfile
-    template_name = 'user/profile-update.html'
-    success_url = reverse_lazy('chat:dashboard')
+class UserUpdateApiView(UpdateAPIView):
+    serializer_class = UserUpdateSerializer
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         return self.request.user

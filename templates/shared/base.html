@@ -26,7 +26,7 @@
     </div>
 </main>
 
-<script src="{% static 'js/jquery-slim.min.js' %}"></script>
+<script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
 
 <script src="{% static 'js/popper.min.js' %}"></script>
 <script src="{% static 'js/swipe.js' %}"></script>
@@ -38,6 +38,45 @@
 
     scrollToBottom(document.getElementById('content'));
 </script>
+<script>
+    // submit user update form
+    $('#user_update_form').on('submit', function (e) {
+        e.preventDefault();
+        const csrf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+        const data = new FormData();
 
+        // validation data
+        const formData = new FormData(this);
+        if (formData.get('password') !== formData.get('password2')) {
+            alert('Passwords are not the same!');
+            return;
+        }
+        for (const fd of formData.entries()) {
+            if (fd[0] === 'avatar' && fd[1].name !== '')
+                data.append(fd[0], fd[1])
+
+            if (['first_name', 'last_name', 'email', 'password', 'password2'].indexOf(fd[0]) > -1 && fd[1] !== '')
+                data.append(fd[0], fd[1])
+        }
+
+        $.ajax({
+            headers: {
+                'X-CSRFToken': csrf_token,
+            },
+            url: '{% url 'user:user_update' %}',
+            method: "PATCH",
+            contentType: false,
+            processData: false,
+            data: data,
+            timeout: 10000, // 10 sec
+            success: (e) => {
+                alert('your account update successfully!')
+            },
+            error: ({responseJSON}) => {
+                alert(Object.values(responseJSON).join('\r\n'));
+            }
+        });
+    });
+</script>
 </body>
 </html>
