@@ -7,10 +7,11 @@ from chat.models import Participant, Message, Conversation
 
 class ConversationSerializer(serializers.ModelSerializer):
     unread_messages = serializers.SerializerMethodField(method_name="get_unread_messages")
+    last_message = serializers.SerializerMethodField(method_name="get_last_message")
 
     class Meta:
         model = Conversation
-        fields = ('id', 'title', 'creator', 'avatar', 'conversation_type', 'unread_messages')
+        fields = ('id', 'title', 'creator', 'avatar', 'conversation_type', 'unread_messages', 'last_message')
 
     def __init__(self, instance=None, data=empty, **kwargs):
         super().__init__(instance, data, **kwargs)
@@ -21,9 +22,20 @@ class ConversationSerializer(serializers.ModelSerializer):
             pass
 
     def get_unread_messages(self, obj: Conversation):
+        """
+        Because each user has different unread messages than the other,
+        we need to get the current user and then call the corresponding functions.
+        """
         assert self.request is not None, "Request is required"
 
         return obj.unread_message_count(self.request.user)
+
+    def get_last_message(self, obj: Conversation):
+        message = obj.last_message
+        if message:
+            return message.text
+        else:
+            return ''
 
     def to_representation(self, instance: Conversation):
         assert self.request is not None, "Request is required"
@@ -37,11 +49,12 @@ class ConversationSerializer(serializers.ModelSerializer):
             """
             other_participant = instance.participant_set.exclude(user=self.request.user).first().user
             representation['title'] = other_participant.get_full_name() or other_participant.username
-
-            if other_participant.avatar:
-                representation['avatar'] = self.request.build_absolute_uri(other_participant.avatar.url)
-            else:
+            try:
+                representation['avatar'] = instance.get_avatar(other_participant)
+            except Exception as e:
                 representation['avatar'] = None
+        else:
+            representation['avatar'] = instance.get_avatar()
 
         return representation
 

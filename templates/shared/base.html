@@ -27,10 +27,10 @@
 </main>
 
 <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-
 <script src="{% static 'js/popper.min.js' %}"></script>
-<script src="{% static 'js/swipe.js' %}"></script>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/swipe.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
 <script>
     function scrollToBottom(el) {
         el.scrollTop = el.scrollHeight;
@@ -79,6 +79,7 @@
     });
 </script>
 <script>
+    // delete account
     $('#collapseSeven').on('click', (e) => {
         const csrf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
 

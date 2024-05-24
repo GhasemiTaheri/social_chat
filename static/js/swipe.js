@@ -7,7 +7,6 @@ $(function () {
 });
 $(document).ready(function () {
     $(".filterDiscussions").not(".all").hide("3000");
-    $(".filterDiscussions").not(".all").hide("3000");
     $(".filterDiscussionsBtn").click(function () {
         var t = $(this).attr("data-filter");
         $(".filterDiscussions").not("." + t).hide("3000");
