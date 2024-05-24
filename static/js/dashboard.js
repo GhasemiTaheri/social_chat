@@ -6,17 +6,7 @@ const chat_section = $('.chat_list');
 
 $(document).ready(() => {
     // _udata = JSON.parse(document.getElementById('uid').textContent);
-    // $(document).keydown(function (e) {
-    //     if (e.key === "Escape" || e.key === "Esc") {
-    //         $('.select-chat').removeClass('d-none');
-    //         $('.select-chat').addClass('d-flex');
-    //         $('.card').css('display', 'none');
-    //         $('.chat').removeClass('active');
-    //         $('#message_box_text').val('')
-    //         socket.close();
-    //         setup_base_screen_width(true)
-    //     }
-    // });
+
     const conManager = new ConversationManagement(".chat_id");
     conManager.getAllConversation();
 });

@@ -5,5 +5,5 @@ socket.onmessage = (event) => {
     const NewMessageEvent = new CustomEvent('NewMessageEvent', {
         detail: data
     });
-    document.dispatchEvent(NewMessageEvent);
+    window.dispatchEvent(NewMessageEvent);
 }

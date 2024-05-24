@@ -1,10 +1,12 @@
+
 $(document).ready(() => {
     getConversations();
 })
 
 function getConversations() {
     $.ajax({
-        url: 'conversation/', success: ({results}) => {
+        url: 'conversation/',
+        success: ({results}) => {
             for (const conversation of results) addNewConversation(conversation);
         },
     });
@@ -13,7 +15,8 @@ function getConversations() {
 function addNewConversation(conversation) {
     $('#chats').prepend(`
         <a class="filterDiscussions all single ${conversation.unread_messages > 0 ? 'unread' : 'read'}"
-         data-toggle="list" data-conversationId="${conversation.id}" role="tab">
+         data-toggle="list" data-conversationId="${conversation.id}" role="tab"
+         onclick="conversationOnClick(this)">
             <img class="avatar-md" src="${conversation.avatar}"
                  data-toggle="tooltip" data-placement="top" title="${conversation.title}" alt="avatar">
             ${conversation.unread_messages > 0 ?
