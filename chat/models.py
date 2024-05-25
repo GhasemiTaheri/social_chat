@@ -102,4 +102,4 @@ class Message(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.sender.get_display_name()}: {self.text}"
+        return f"{self.sender.display_name}: {self.text}"

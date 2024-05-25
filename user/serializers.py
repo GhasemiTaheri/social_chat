@@ -18,3 +18,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     def validate_password(self, value):
         validate_password(value)
         return make_password(value)
+
+
+class MessageSenderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'display_name', 'get_avatar']

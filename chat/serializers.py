@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 
 from chat.models import Participant, Message, Conversation
+from user.serializers import MessageSenderSerializer
 
 
 class ConversationSerializer(serializers.ModelSerializer):
@@ -72,11 +73,8 @@ class ReceiveMessageSerializer(serializers.Serializer):
 
 
 class SendMessageSerializer(serializers.ModelSerializer):
+    sender = MessageSenderSerializer(read_only=True)
+
     class Meta:
         model = Message
         fields = '__all__'
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['conversation'] = str(instance.conversation_id)
-        return representation

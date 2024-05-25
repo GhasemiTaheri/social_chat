@@ -3,10 +3,12 @@ from django.db.models import Max
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from chat.forms import ConversationCreateForm
 from chat.models import Conversation
-from chat.serializers import ConversationSerializer
+from chat.serializers import ConversationSerializer, SendMessageSerializer
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -33,3 +35,15 @@ class ConversationViewSet(viewsets.ModelViewSet):
                 .annotate(last_message_date=Max('message__create_at'))
                 .distinct()
                 .order_by('-last_message_date'))
+
+    @action(methods=['get'], detail=True, serializer_class=SendMessageSerializer)
+    def get_messages(self, request, *args, **kwargs):
+        queryset = self.get_object().message_set.all().order_by('-create_at')
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

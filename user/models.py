@@ -8,6 +8,13 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to='user_avatar/', blank=True, null=True)
     last_online = models.DateTimeField(null=True)
 
+    @property
+    def display_name(self):
+        if self.get_full_name():
+            return self.get_full_name()
+        else:
+            return self.username
+
     @cached_property
     def get_avatar(self):
         if self.avatar:
