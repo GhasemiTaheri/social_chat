@@ -1,3 +1,4 @@
+let userId = null;
 window.addEventListener('popstate', (event) => {
     if (event.state.type === 'chat-active') {
         $('#message-container').empty();
@@ -7,11 +8,13 @@ window.addEventListener('popstate', (event) => {
 });
 window.addEventListener('SocketEvent', (event) => {
     const payload = event.detail;
-    addNewMessageToConversation(payload);
+    if (window.history.state.id === payload.conversation)
+        addMessageToConversation(payload);
 });
 
 $(document).ready(() => {
     getConversations();
+    userId = window.sessionStorage.getItem('user-id');
 })
 
 function getConversations() {
@@ -42,50 +45,20 @@ function addNewConversation(conversation) {
     `)
 }
 
-function addNewMessageToConversation(message) {
-    const othersMessagesTemplate = `<div class="message">
-        <img class="avatar-md" src="#AVATAR" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-        <div class="text-main">
-            <div class="text-group">
-                <div class="text">
-                <p>#TEXT</p>
-                </div>
-            </div>
-        <span>#EXTRA</span>
-        </div>
-    </div>`;
-    if (window.history.state.id === message.conversation) {
-        const messageContainer = $("#message-container");
-        const messageDate = new Date(message.create_at);
-        messageContainer.append(othersMessagesTemplate
-            .replace("#AVATAR", message.sender.get_avatar)
-            .replace("#TEXT", message.text)
-            .replace('#EXTRA', `${message.sender.display_name} | ${messageDate.toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit'
-            })}`)
-        );
-    }
-}
-
 function getConversationInformation(conversationId) {
     $.ajax({
         url: `conversation/${conversationId}/`,
-        success: (results) => {
-            setupConversationPage(results);
+        success: (conversationInfo) => {
+            const conversationImg = $("#conversation-image");
+            conversationImg.attr('src', conversationInfo.avatar);
+            conversationImg.attr('title', conversationInfo.title);
+
+            let information = `<h5><a href="#">${conversationInfo.title}</a></h5>`;
+            if (conversationInfo.conversation_type === 'gr')
+                information = information + `<span>${conversationInfo.member_count} members</span>`
+            $('#conversation-data').html(information);
         }
     });
-}
-
-function setupConversationPage(conversationInfo) {
-    const conversationImg = $("#conversation-image");
-    conversationImg.attr('src', conversationInfo.avatar);
-    conversationImg.attr('title', conversationInfo.title);
-
-    let information = `<h5><a href="#">${conversationInfo.title}</a></h5>`;
-    if (conversationInfo.conversation_type === 'gr')
-        information = information + `<span>${conversationInfo.member_count} members</span>`
-    $('#conversation-data').html(information);
 }
 
 function getConversationMessage(conversionId) {
@@ -112,39 +85,18 @@ function groupMessageByDate(messageList) {
 }
 
 function createArchiveMessage(messageGroup, scrollToBottom = true) {
-    const othersMessagesTemplate = `
-    <div class="message">
-        <img class="avatar-md" src="#AVATAR" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-        <div class="text-main">
-            <div class="text-group">
-                <div class="text">
-                <p>#TEXT</p>
-                </div>
-            </div>
-        <span>#EXTRA</span>
-        </div>
-    </div>`
+    const messageContainer = $("#message-container");
     const dateTemplate = `<div class="date">
                                     <hr>
                                     <span>#DATE</span>
                                     <hr>
                                  </div>`;
 
-    const messageContainer = $("#message-container");
     for (const [date, messages] of Object.entries(messageGroup)) {
 
-        for (const message of messages) {
-            const messageDate = new Date(message.create_at);
-            messageContainer.prepend(
-                othersMessagesTemplate
-                    .replace("#AVATAR", message.sender.get_avatar)
-                    .replace("#TEXT", message.text)
-                    .replace('#EXTRA', `${message.sender.display_name} | ${messageDate.toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}`)
-            );
-        }
+        for (const message of messages)
+            addMessageToConversation(message, true);
+
         const currentDate = new Date();
         const groupDate = new Date(date);
         const timeDifference = Math.abs(currentDate - groupDate);
@@ -160,4 +112,58 @@ function createArchiveMessage(messageGroup, scrollToBottom = true) {
 
     if (scrollToBottom)
         $('#content').animate({scrollTop: $('#content').prop("scrollHeight")}, 500);
+}
+
+function addMessageToConversation(message, prepend = false) {
+
+    const messageContainer = $("#message-container");
+    const messageDate = new Date(message.create_at);
+
+    const othersMessagesTemplate = `<div class="message">
+        <img class="avatar-md" src="#AVATAR" data-toggle="tooltip" data-placement="top" title="#TITLE" alt="avatar">
+        <div class="text-main">
+            <div class="text-group">
+                <div class="text">
+                <p>#TEXT</p>
+                </div>
+            </div>
+        <span>#EXTRA</span>
+        </div>
+    </div>`
+        .replace("#AVATAR", message.sender.get_avatar)
+        .replace('#TITLE', message.sender.display_name)
+        .replace("#TEXT", message.text)
+        .replace('#EXTRA', `${message.sender.display_name} | ${messageDate.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+        })}`);
+
+    const myMessageTemplate =
+        `<div class="message me">
+                <div class="text-main">
+                    <div class="text-group me">
+                        <div class="text me">
+                            <p>#TEXT</p>
+                        </div>
+                    </div>
+                    <span>#EXTRA</span>
+                </div>
+          </div>`.replace('#TEXT', message.text)
+            .replace('#EXTRA', `${messageDate.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            })}`)
+
+    let finalMessage = null;
+
+    if (String(message.sender.id) === String(userId))
+        finalMessage = myMessageTemplate;
+    else
+        finalMessage = othersMessagesTemplate;
+
+    if (prepend)
+        messageContainer.prepend(finalMessage);
+    else
+        messageContainer.append(finalMessage);
+
 }
