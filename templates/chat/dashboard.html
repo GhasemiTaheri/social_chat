@@ -20,9 +20,7 @@
                                              data-toggle="tooltip" data-placement="top" title=""
                                              alt="avatar">
                                     </a>
-                                    <div class="data">
-                                        <h5><a href="#" id="conversation-title"></a></h5>
-                                        {#<span>Active now</span>#}
+                                    <div class="data" id="conversation-data">
                                     </div>
                                     <button class="btn d-md-block d-none"><i class="material-icons md-30">info</i>
                                     </button>
@@ -52,14 +50,15 @@
                     <div class="container">
                         <div class="col-md-12">
                             <div class="bottom">
-                                <form class="position-relative w-100">
-                                        <textarea class="form-control" placeholder="Start typing for reply..."
+                                <div class="position-relative w-100">
+                                        <textarea class="form-control" id="message-input"
+                                                  placeholder="Start typing for reply..."
                                                   rows="1"></textarea>
                                     <button class="btn emoticons"><i class="material-icons">insert_emoticon</i>
                                     </button>
-                                    <button type="submit" class="btn send"><i class="material-icons">send</i>
+                                    <button class="btn send" onclick="sendMessage()"><i class="material-icons">send</i>
                                     </button>
-                                </form>
+                                </div>
                             </div>
                         </div>
                     </div>

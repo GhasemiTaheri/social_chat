@@ -5,6 +5,10 @@ window.addEventListener('popstate', (event) => {
         getConversationMessage(event.state.id);
     }
 });
+window.addEventListener('SocketEvent', (event) => {
+    const payload = event.detail;
+    addNewMessageToConversation(payload);
+});
 
 $(document).ready(() => {
     getConversations();
@@ -38,6 +42,32 @@ function addNewConversation(conversation) {
     `)
 }
 
+function addNewMessageToConversation(message) {
+    const othersMessagesTemplate = `<div class="message">
+        <img class="avatar-md" src="#AVATAR" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
+        <div class="text-main">
+            <div class="text-group">
+                <div class="text">
+                <p>#TEXT</p>
+                </div>
+            </div>
+        <span>#EXTRA</span>
+        </div>
+    </div>`;
+    if (window.history.state.id === message.conversation) {
+        const messageContainer = $("#message-container");
+        const messageDate = new Date(message.create_at);
+        messageContainer.append(othersMessagesTemplate
+            .replace("#AVATAR", message.sender.get_avatar)
+            .replace("#TEXT", message.text)
+            .replace('#EXTRA', `${message.sender.display_name} | ${messageDate.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            })}`)
+        );
+    }
+}
+
 function getConversationInformation(conversationId) {
     $.ajax({
         url: `conversation/${conversationId}/`,
@@ -52,8 +82,10 @@ function setupConversationPage(conversationInfo) {
     conversationImg.attr('src', conversationInfo.avatar);
     conversationImg.attr('title', conversationInfo.title);
 
-    const conversationTitle = $("#conversation-title");
-    conversationTitle.text(conversationInfo.title);
+    let information = `<h5><a href="#">${conversationInfo.title}</a></h5>`;
+    if (conversationInfo.conversation_type === 'gr')
+        information = information + `<span>${conversationInfo.member_count} members</span>`
+    $('#conversation-data').html(information);
 }
 
 function getConversationMessage(conversionId) {

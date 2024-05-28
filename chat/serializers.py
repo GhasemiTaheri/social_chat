@@ -12,7 +12,9 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Conversation
-        fields = ('id', 'title', 'creator', 'avatar', 'conversation_type', 'unread_messages', 'last_message')
+        fields = ('id', 'title', 'creator',
+                  'avatar', 'conversation_type', 'unread_messages',
+                  'last_message', 'member_count')
 
     def __init__(self, instance=None, data=empty, **kwargs):
         super().__init__(instance, data, **kwargs)
@@ -74,7 +76,11 @@ class ReceiveMessageSerializer(serializers.Serializer):
 
 class SendMessageSerializer(serializers.ModelSerializer):
     sender = MessageSenderSerializer(read_only=True)
+    conversation = serializers.SerializerMethodField(method_name='get_conversation_uuid')
 
     class Meta:
         model = Message
         fields = '__all__'
+
+    def get_conversation_uuid(self, obj: Message) -> str:
+        return str(obj.conversation_id)
