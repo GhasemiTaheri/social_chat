@@ -3,7 +3,7 @@
 {% block body %}
     <div class="main">
         <div class="tab-content" id="nav-tabContent">
-            
+
             <!-- Start of Babble -->
             <div class="babble tab-pane fade" id="list-chat" role="tabpanel"
                  aria-labelledby="list-chat-list">
@@ -13,15 +13,16 @@
                         <div class="container">
                             <div class="col-md-12">
                                 <div class="inside">
-                                    <a href="#"><img class="avatar-md" src="dist/img/avatars/avatar-female-5.jpg"
-                                                     data-toggle="tooltip" data-placement="top" title="Keith"
-                                                     alt="avatar"></a>
-                                    <div class="status">
-                                        <i class="material-icons online">fiber_manual_record</i>
-                                    </div>
+                                    <a href="#">
+                                        <img id="conversation-image"
+                                             class="avatar-md"
+                                             src="#"
+                                             data-toggle="tooltip" data-placement="top" title=""
+                                             alt="avatar">
+                                    </a>
                                     <div class="data">
-                                        <h5><a href="#">Keith Morris</a></h5>
-                                        <span>Active now</span>
+                                        <h5><a href="#" id="conversation-title"></a></h5>
+                                        {#<span>Active now</span>#}
                                     </div>
                                     <button class="btn d-md-block d-none"><i class="material-icons md-30">info</i>
                                     </button>
@@ -66,9 +67,10 @@
                 <!-- End of Chat -->
             </div>
             <!-- End of Babble -->
-            
+
             <!-- Start of Babble -->
-            <div class="babble tab-pane fade active show" id="list-empty" role="tabpanel" aria-labelledby="list-empty-list">
+            <div class="babble tab-pane fade active show" id="list-empty" role="tabpanel"
+                 aria-labelledby="list-empty-list">
                 <div class="chat" id="chat2">
                     <div class="content empty">
                         <div class="container">

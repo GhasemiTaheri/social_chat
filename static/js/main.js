@@ -1,6 +1,7 @@
 window.addEventListener('popstate', (event) => {
     if (event.state.type === 'chat-active') {
         $('#message-container').empty();
+        getConversationInformation(event.state.id);
         getConversationMessage(event.state.id);
     }
 });
@@ -35,6 +36,24 @@ function addNewConversation(conversation) {
             
         </a>
     `)
+}
+
+function getConversationInformation(conversationId) {
+    $.ajax({
+        url: `conversation/${conversationId}/`,
+        success: (results) => {
+            setupConversationPage(results);
+        }
+    });
+}
+
+function setupConversationPage(conversationInfo) {
+    const conversationImg = $("#conversation-image");
+    conversationImg.attr('src', conversationInfo.avatar);
+    conversationImg.attr('title', conversationInfo.title);
+
+    const conversationTitle = $("#conversation-title");
+    conversationTitle.text(conversationInfo.title);
 }
 
 function getConversationMessage(conversionId) {
