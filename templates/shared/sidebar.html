@@ -8,10 +8,12 @@
                     <div class="search">
                         <form class="form-inline position-relative">
                             <input type="search" class="form-control" id="conversations"
-                                   placeholder="Search for discussion...">
+                                   placeholder="Search for conversations...">
                             <button type="button" class="btn btn-link loop"><i class="material-icons">search</i>
                             </button>
                         </form>
+                        <button class="btn create" data-toggle="modal" data-target="#startnewchat"><i
+                                class="material-icons">create</i></button>
                     </div>
                     <div class="list-group sort">
                         <button class="btn filterDiscussionsBtn active show" data-toggle="list"
@@ -187,3 +189,47 @@
     </div>
 </div>
 <!-- End of Sidebar -->
+
+<!-- Start of Create Chat -->
+<div class="modal fade" id="startnewchat" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="requests">
+            <div class="title">
+                <h1>Start new conversation</h1>
+                <button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i>
+                </button>
+            </div>
+            <div class="content">
+                <div class="nav nav-tabs mb-2">
+                    <div class="menu d-flex flex-row justify-content-around mb-3 w-100">
+                        <a href="#search-group" data-toggle="tab" class="d-flex flex-column">
+                            <i class="material-icons" style="font-size: 30px; margin: 0 auto">search</i>
+                            <span>join group</span>
+                        </a>
+                        <a href="#new-group" data-toggle="tab" class="d-flex flex-column">
+                            <i class="material-icons" style="font-size: 30px; margin: 0 auto">group_add</i>
+                            <span>new group</span>
+                        </a>
+                        <a href="#new-friend" data-toggle="tab" class="d-flex flex-column">
+                            <i class="material-icons" style="font-size: 30px; margin: 0 auto">person_add</i>
+                            <span>new friend</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <div id="search-group" class="tab-pane fade in active">
+                        <select id="search-group-input" style="width: 100%;"></select>
+                    </div>
+                    <div id="new-group" class="tab-pane fade">
+                        how are
+                    </div>
+                    <div id="new-friend" class="tab-pane fade">
+                        you
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End of Create Chat -->

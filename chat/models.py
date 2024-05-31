@@ -51,10 +51,13 @@ class Conversation(models.Model):
         """
         This method calculates the number of unread messages by a user
         """
-        conv_user = self.participant_set.get(user=participant)
-        return (self.message_set
-                .filter(create_at__gt=Coalesce(conv_user.last_read, conv_user.created_at))
-                .count())
+        try:
+            conv_user = self.participant_set.get(user=participant)
+            return (self.message_set
+                    .filter(create_at__gt=Coalesce(conv_user.last_read, conv_user.created_at))
+                    .count())
+        except:
+            return 0
 
     def __str__(self):
         return f"{self.get_conversation_type_display()} - {self.title}"
