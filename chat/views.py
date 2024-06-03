@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from chat.forms import ConversationCreateForm
 from chat.models import Conversation, Participant
 from chat.serializers import ConversationSerializer, SendMessageSerializer
+from utilities.view.ViewMixin import SearchMixin
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -26,15 +27,14 @@ class GroupCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
 
-class ConversationViewSet(viewsets.ModelViewSet):
+class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
-    filter_backends = [filters.SearchFilter]
     search_fields = ('^title',)
 
     def get_queryset(self):
         current_user = self.request.user
 
-        if self.action in ['search_conversation', 'join']:
+        if self.action in ['search', 'join']:
             return Conversation.objects.exclude(participant__user_id__in=[self.request.user.id]).order_by('id')
 
         return (Conversation.objects.filter(participant__user_id=current_user.id)
@@ -60,11 +60,3 @@ class ConversationViewSet(viewsets.ModelViewSet):
         Participant.objects.create(user=request.user, conversation=obj)
 
         return Response(status=status.HTTP_200_OK)
-
-    @action(methods=['get'], detail=False)
-    def search_conversation(self, request, *args, **kwargs):
-        search = self.request.query_params.get('search', None)
-        if search:
-            return self.list(request, *args, **kwargs)
-
-        return Response(data={'results': []}, status=200)

@@ -221,10 +221,46 @@
                         <select id="search-group-input" style="width: 100%;"></select>
                     </div>
                     <div id="new-group" class="tab-pane fade">
-                        how are
+                        <form id="user_update_form" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <!--Start upload avatar-->
+                            <div class="parent mb-3">
+                                <label>
+                                    <input class="form-control" name='avatar' type="file"
+                                           placeholder="choose an image">
+                                </label>
+                                <p>For best results, use an image at least 256px by 256px in either
+                                    .jpg or .png format!</p>
+                            </div>
+                            <!--End upload avatar-->
+
+                            <div class="parent mb-2">
+                                <div class="field">
+                                    <label for="group-title">Name <span>*</span></label>
+                                    <input type="text"
+                                           class="form-control"
+                                           name="title"
+                                           id="group-title"
+                                           placeholder="Group name">
+                                </div>
+                            </div>
+                            <div class="parent mb-2">
+                                <div class="field">
+                                    <label for="group-member-select">Members</label>
+                                    <br>
+                                    <select class="form-control"
+                                            id="group-member-select"
+                                            name="members"
+                                            style="width: 100%">
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn button w-100">Apply</button>
+                        </form>
                     </div>
                     <div id="new-friend" class="tab-pane fade">
-                        you
+                        <select id="new-friend-select" style="width: 100%"></select>
                     </div>
                 </div>
 

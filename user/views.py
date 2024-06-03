@@ -5,9 +5,12 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, CreateView
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import UpdateModelMixin, DestroyModelMixin
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from user.forms import UserRegisterForm
-from user.serializers import UserUpdateSerializer
+from user.models import User
+from user.serializers import UserUpdateSerializer, PublicUserSerializer
+from utilities.view.ViewMixin import SearchMixin
 
 
 class SignUpView(CreateView):
@@ -31,3 +34,9 @@ class UserUpdateDestroyApiView(UpdateModelMixin, DestroyModelMixin, GenericAPIVi
 
     def get_object(self):
         return self.request.user
+
+
+class UserReadViewSet(SearchMixin, ReadOnlyModelViewSet):
+    serializer_class = PublicUserSerializer
+    queryset = User.objects.all()
+    search_fields = ('^username',)

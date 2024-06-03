@@ -24,3 +24,9 @@ class MessageSenderSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'display_name', 'get_avatar']
+
+
+class PublicUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'display_name', 'get_avatar']

@@ -49,7 +49,7 @@ $(document).ready(function () {
         width: 'resolve',
         placeholder: 'Search for conversation...',
         ajax: {
-            url: 'conversation/search_conversation/',
+            url: 'conversation/search/',
             delay: 250,
             data: (params) => {
                 return {
@@ -86,6 +86,54 @@ $(document).ready(function () {
 
         searchSelect.val('');
     });
+
+    // group member select
+    const groupMemberSelect = $('#group-member-select');
+    groupMemberSelect.select2({
+        dropdownParent: $("#startnewchat"),
+        width: 'resolve',
+        placeholder: 'Search for people...',
+        ajax: {
+            url: `${window.location.protocol}//${window.location.host}/profile/user/search/`,
+            delay: 250,
+            data: (params) => {
+                return {
+                    search: params.term,
+                    page: params.page || 1
+                };
+            }
+        },
+        templateResult: (state) => {
+            return $(`<span data-userId="${state.id}">
+                    <img class="avatar-sm mr-2" src="${state.get_avatar}" alt="avatar">
+                    <span>${state.display_name}</span>
+                </span>`)
+        }
+    });
+
+    // new friend select
+    const newFriendSelect = $('#new-friend-select');
+    newFriendSelect.select2({
+        dropdownParent: $("#startnewchat"),
+        width: 'resolve',
+        placeholder: 'Search for people...',
+        ajax: {
+            url: `${window.location.protocol}//${window.location.host}/profile/user/search/`,
+            delay: 250,
+            data: (params) => {
+                return {
+                    search: params.term,
+                    page: params.page || 1
+                };
+            }
+        },
+        templateResult: (state) => {
+            return $(`<span data-userId="${state.id}">
+                    <img class="avatar-sm mr-2" src="${state.get_avatar}" alt="avatar">
+                    <span>${state.display_name}</span>
+                </span>`)
+        }
+    })
 });
 
 function conversationOnClick(element) {
