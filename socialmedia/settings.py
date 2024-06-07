@@ -3,6 +3,7 @@ import environ
 from pathlib import Path
 
 from django.urls import reverse_lazy
+from redis import Redis
 
 env = environ.Env()
 
@@ -70,7 +71,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('localhost', 6379)],
+            "hosts": [(env.str('REDIS_HOST', default='localhost'), env.int('REDIS_PORT', 6379))],
         },
     },
 }
@@ -146,3 +147,7 @@ REST_FRAMEWORK = {
     ),
     'PAGE_SIZE': 20,
 }
+
+REDIS_SERVER = Redis(host=env.str('REDIS_HOST', default='localhost'),
+                     port=env.int('REDIS_PORT', default=6379),
+                     decode_responses=True)

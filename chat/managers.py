@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Count, Q
 
 
 class GroupConversationManager(models.Manager):
@@ -14,3 +15,10 @@ class PrivateConversationManager(models.Manager):
         # just return private conversation
         from chat.models import Conversation
         return super().get_queryset().filter(conversation_type=Conversation.SINGLE)
+
+    def private_conversation_exists(self, user1, user2):
+        q1 = self.filter(participant__user_id=user1.id).values_list('id', flat=True)
+        queryset = (self.filter(id__in=q1)
+                    .annotate(other_part=Count('participant', filter=Q(participant__user_id=user2.id)))
+                    .filter(other_part__gt=0))
+        return queryset

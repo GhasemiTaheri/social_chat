@@ -199,24 +199,27 @@
                 <button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i>
                 </button>
             </div>
-            <div class="content">
-                <div class="nav nav-tabs mb-2">
-                    <div class="menu d-flex flex-row justify-content-around mb-3 w-100">
-                        <a href="#search-group" data-toggle="tab" class="d-flex flex-column">
+            <div class="container">
+                <ul class="nav nav-pills d-flex flex-row justify-content-around mb-3 w-100">
+                    <li class="active">
+                        <a href="#search-group" data-toggle="pill" class="d-flex flex-column">
                             <i class="material-icons" style="font-size: 30px; margin: 0 auto">search</i>
                             <span>join group</span>
                         </a>
-                        <a href="#new-group" data-toggle="tab" class="d-flex flex-column">
-                            <i class="material-icons" style="font-size: 30px; margin: 0 auto">group_add</i>
-                            <span>new group</span>
-                        </a>
-                        <a href="#new-friend" data-toggle="tab" class="d-flex flex-column">
+                    </li>
+                    <li><a href="#new-group" data-toggle="pill" class="d-flex flex-column">
+                        <i class="material-icons" style="font-size: 30px; margin: 0 auto">group_add</i>
+                        <span>new group</span>
+                    </a></li>
+                    <li>
+                        <a href="#new-friend" data-toggle="pill" class="d-flex flex-column">
                             <i class="material-icons" style="font-size: 30px; margin: 0 auto">person_add</i>
                             <span>new friend</span>
                         </a>
-                    </div>
-                </div>
-                <div class="tab-content">
+                    </li>
+                </ul>
+
+                <div class="tab-content mb-3">
                     <div id="search-group" class="tab-pane fade in active">
                         <select id="search-group-input" style="width: 100%;"></select>
                     </div>
@@ -226,10 +229,9 @@
 
                             <!--Start upload avatar-->
                             <div class="parent mb-3">
-                                <label>
-                                    <input class="form-control" name='avatar' type="file"
-                                           placeholder="choose an image">
-                                </label>
+                                <label>Group avatar</label>
+                                <input class="form-control" name='avatar' type="file"
+                                       placeholder="choose an image">
                                 <p>For best results, use an image at least 256px by 256px in either
                                     .jpg or .png format!</p>
                             </div>
@@ -252,6 +254,7 @@
                                     <select class="form-control"
                                             id="group-member-select"
                                             name="members"
+                                            multiple="multiple"
                                             style="width: 100%">
                                     </select>
                                 </div>
@@ -263,7 +266,6 @@
                         <select id="new-friend-select" style="width: 100%"></select>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

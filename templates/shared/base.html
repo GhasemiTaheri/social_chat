@@ -15,6 +15,9 @@
     <link href="{% static 'css/swipe.css' %}" type="text/css" rel="stylesheet">
     <!-- Favicon-->
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}"/>
+
+    {% block header %}
+    {% endblock %}
 </head>
 <body>
 <main>
@@ -33,6 +36,7 @@
 <script src="{% static 'js/WsConnector.js' %}"></script>
 
 <script src="{% static 'js/UiManager.js' %}"></script>
+<script src="{% static 'js/Select2Maker.js' %}"></script>
 <script src="{% static 'js/main.js' %}"></script>
 <script>
     window.sessionStorage.setItem('user-id', {{ user.id }});

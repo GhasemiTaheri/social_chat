@@ -2099,8 +2099,35 @@ input:checked + .slider:before {
     box-shadow: none !important
 }
 
-.modal .nav-tabs .active {
+/* extra style*/
+.modal .nav a.active {
     color: #2196F3;
+}
+
+.select2-selection__rendered {
+    line-height: 40px !important;
+}
+
+.select2-container .select2-selection {
+    height: 40px !important;
+    background: #f5f5f5;
+    width: 100% !important;
+    border-radius: 6px;
+    border: none;
+    font-size: 16px;
+    color: #bdbac2 !important;
+}
+
+.select2-container .select2-selection--multiple {
+    height: 55px !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: white;
+}
+
+.select2-selection__arrow {
+    height: 40px !important;
 }
 
 @media (max-width: 1200px) {

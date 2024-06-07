@@ -86,7 +86,7 @@ class PrivateConversation(Conversation):
         proxy = True
 
     def participants(self):
-        return ', '.join(user.username for user in self.participant_set.all())
+        return ', '.join(item.user.username for item in self.participant_set.all())
 
 
 class Participant(models.Model):
