@@ -10,8 +10,12 @@ window.addEventListener('SocketEvent', (event) => {
     const payload = event.detail;
     if ('event_type' in payload) {
         if (payload.event_type === 'new_message') {
-            if (window.history.state.id === payload.conversation)
+            // reorder chat list section
+            $(`[data-conversationId="${payload.data.conversation}"]`).prependTo("#chats");
+            $(`[data-conversationId="${payload.data.conversation} p"]`).text(payload.data.text.slice(0, 15) + '...');
+            if (window.history.state.id === payload.data.conversation)
                 addMessageToConversation(payload.data);
+
         } else if (payload.event_type === 'conversation_add') {
             addNewConversation(payload.data);
         }
