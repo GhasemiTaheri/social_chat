@@ -12,9 +12,18 @@ window.addEventListener('SocketEvent', (event) => {
         if (payload.event_type === 'new_message') {
             // reorder chat list section
             $(`[data-conversationId="${payload.data.conversation}"]`).prependTo("#chats");
-            $(`[data-conversationId="${payload.data.conversation} p"]`).text(payload.data.text.slice(0, 15) + '...');
-            if (window.history.state.id === payload.data.conversation)
+            $(`[data-conversationId="${payload.data.conversation} p"]`).text(payload.data.text.slice(0, 15));
+            if (window.history.state.id === payload.data.conversation) {
                 addMessageToConversation(payload.data);
+                return
+            }
+            const unreadMessageCounter = $(`[data-conversationId="${payload.data.conversation}"] .new span`);
+            if (unreadMessageCounter)
+                unreadMessageCounter.text(parseInt(unreadMessageCounter.text()) + 1)
+            else
+                $(`[data-conversationId="${payload.data.conversation}"] img`)
+                    .after('<div class="new bg-primary"><span>1</span></div>')
+
 
         } else if (payload.event_type === 'conversation_add') {
             addNewConversation(payload.data);
