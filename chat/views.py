@@ -2,6 +2,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max
+from django.db.models.functions import Coalesce
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView
 from rest_framework import viewsets, status
@@ -9,8 +10,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from chat.forms import ConversationCreateForm
-from chat.models import Conversation, Participant, PrivateConversation
-from chat.serializers import ConversationSerializer, SendMessageSerializer, ConversationCreateSerializer
+from chat.models import Conversation, Participant
+from chat.serializers import ConversationSerializer, SendMessageSerializer
 from socialmedia.settings import REDIS_SERVER as redis_db
 from utilities.view.ViewMixin import SearchMixin
 
@@ -41,34 +42,18 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
             return Conversation.objects.exclude(participant__user_id__in=[self.request.user.id]).order_by('id')
 
         return (Conversation.objects.filter(participant__user_id=current_user.id)
-                .annotate(last_message_date=Max('message__create_at'))
+                .annotate(last_message_date=Coalesce(Max('message__create_at'), Max('created_at')))
                 .distinct()
-                .order_by('-last_message_date'))
-
-    def get_serializer_class(self):
-
-        if self.action.lower() in ['create']:
-            return ConversationCreateSerializer
-
-        return super().get_serializer_class()
+                .order_by('last_message_date'))
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        if serializer.validated_data.get('conversation_type') == Conversation.SINGLE:
-            current_user = request.user
-            other_participant = serializer.validated_data.get('members')[0]
-            queryset = PrivateConversation.objects.private_conversation_exists(current_user, other_participant)
-            if queryset:
-                return Response()
-
         obj: Conversation = self.perform_create(serializer)
 
         channel_layer = get_channel_layer()
         for i in obj.participant_set.all():
             participant_channel_name = redis_db.get(f'channel_user_{i.user_id}')
-
             if participant_channel_name:
                 async_to_sync(channel_layer.group_add)(str(obj.id), participant_channel_name)
 
@@ -80,7 +65,7 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
             }
         })
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
         return serializer.save()

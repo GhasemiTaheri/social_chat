@@ -8,8 +8,15 @@ window.addEventListener('popstate', (event) => {
 });
 window.addEventListener('SocketEvent', (event) => {
     const payload = event.detail;
-    if (window.history.state.id === payload.conversation)
-        addMessageToConversation(payload);
+    if ('event_type' in payload) {
+        if (payload.event_type === 'new_message') {
+            if (window.history.state.id === payload.conversation)
+                addMessageToConversation(payload.data);
+        } else if (payload.event_type === 'conversation_add') {
+            addNewConversation(payload.data);
+        }
+    }
+
 });
 
 $(document).ready(() => {
@@ -27,6 +34,7 @@ function getConversations() {
 }
 
 function addNewConversation(conversation) {
+
     $('#chats').prepend(`
         <a class="filterDiscussions all single ${conversation.unread_messages > 0 ? 'unread' : 'read'}"
          data-toggle="list" data-conversationId="${conversation.id}" role="tab"

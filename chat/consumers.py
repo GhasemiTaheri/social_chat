@@ -56,7 +56,10 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def serialize_new_message(self, msg):
-        return SendMessageSerializer(instance=msg).data
+        return {
+            'event_type': 'new_message',
+            'data': SendMessageSerializer(instance=msg).data
+        }
 
     @database_sync_to_async
     def set_conversations(self) -> None:

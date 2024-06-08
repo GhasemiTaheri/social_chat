@@ -1,28 +1,35 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import empty, HiddenField, CurrentUserDefault, SerializerMethodField
+from rest_framework.fields import empty, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 
-from chat.models import Participant, Message, Conversation
+from chat.models import Participant, Message, Conversation, PrivateConversation
 from user.serializers import MessageSenderSerializer
 
 
 class ConversationSerializer(serializers.ModelSerializer):
+    members = PrimaryKeyRelatedField(required=False, many=True, queryset=get_user_model().objects.all())
+
     unread_messages = SerializerMethodField(method_name="get_unread_messages")
     last_message = SerializerMethodField(method_name="get_last_message")
 
     class Meta:
         model = Conversation
         fields = ('id', 'title', 'creator',
-                  'avatar', 'conversation_type', 'unread_messages',
-                  'last_message', 'member_count')
+                  'avatar', 'conversation_type', 'members',
+                  'unread_messages', 'last_message', 'member_count')
+        extra_kwargs = {
+            'title': {'required': False},
+            'conversation_type': {'required': True},
+        }
 
     def __init__(self, instance=None, data=empty, **kwargs):
         super().__init__(instance, data, **kwargs)
 
         try:
             self.request = self.context.get('request')
+            self.current_user = self.request.user
         except:
             pass
 
@@ -63,80 +70,39 @@ class ConversationSerializer(serializers.ModelSerializer):
 
         return representation
 
-
-class ConversationCreateSerializer(serializers.ModelSerializer):
-    members = PrimaryKeyRelatedField(required=False, many=True, queryset=get_user_model().objects.all())
-    creator = HiddenField(default=CurrentUserDefault())
-
-    class Meta:
-        model = Conversation
-        fields = ['id', 'title', 'creator', 'conversation_type', 'avatar', 'members']
-        extra_kwargs = {
-            'title': {'required': False},
-            'conversation_type': {'required': True},
-        }
-
-    def __init__(self, instance=None, data=empty, **kwargs):
-        super().__init__(instance, data, **kwargs)
-
-        try:
-            self.request = self.context.get('request')
-        except:
-            pass
-
     def validate(self, attrs):
-        if attrs.get('conversation_type') == 'si':
+        if attrs.get('conversation_type') == Conversation.SINGLE:
 
             if len(attrs.get('members')) > 1:
                 raise ValidationError("You can't send messages to multiple people in private mode!")
             elif len(attrs.get('members')) < 1:
                 raise ValidationError("You have to pick at least one!")
 
-            if attrs.get('creator') == attrs.get('members')[0]:
+            if attrs.get('members')[0] == self.current_user:
                 raise ValidationError("You can't start a conversation with yourself!")
+
+            queryset = PrivateConversation.objects.private_conversation_exists(self.current_user,
+                                                                               attrs.get('members')[0])
+            if queryset:
+                raise ValidationError('This conversation has already been created!')
 
         return attrs
 
     def create(self, validated_data):
-        current_user = self.context['request'].user
-
         members = validated_data.pop('members')
 
         if validated_data['conversation_type'] == 'si':
             validated_data['title'] = "single conversation"
 
+        validated_data['creator'] = self.current_user
         conversation = super().create(validated_data)
 
         # add conversation starter as participant
-        Participant.objects.create(user=current_user, conversation=conversation)
+        Participant.objects.create(user=self.current_user, conversation=conversation)
         for i in members:
             Participant.objects.create(user=i, conversation=conversation)
 
         return conversation
-
-    def save(self, **kwargs):
-        return super().save(**kwargs)
-
-    def to_representation(self, instance: Conversation):
-        assert self.request is not None, "Request is required"
-
-        representation = super().to_representation(instance)
-
-        if instance.conversation_type == instance.SINGLE:
-            """
-            If there is a private conversation.
-            We need to display the profile picture and name of the user chatting with the current user.
-            """
-            other_participant = instance.participant_set.exclude(user=self.request.user).first().user
-            representation['title'] = other_participant.get_full_name() or other_participant.username
-            try:
-                representation['avatar'] = instance.get_avatar(other_participant)
-            except Exception as e:
-                representation['avatar'] = None
-        else:
-            representation['avatar'] = instance.get_avatar()
-
-        return representation
 
 
 class ReceiveMessageSerializer(serializers.Serializer):
