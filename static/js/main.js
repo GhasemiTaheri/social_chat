@@ -17,13 +17,15 @@ window.addEventListener('SocketEvent', (event) => {
                 addMessageToConversation(payload.data);
                 return
             }
-            const unreadMessageCounter = $(`[data-conversationId="${payload.data.conversation}"] .new span`);
-            if (unreadMessageCounter)
-                unreadMessageCounter.text(parseInt(unreadMessageCounter.text()) + 1)
-            else
-                $(`[data-conversationId="${payload.data.conversation}"] img`)
-                    .after('<div class="new bg-primary"><span>1</span></div>')
 
+            const unreadMessageCounter = $(`[data-conversationId="${payload.data.conversation}"] .new span`);
+            if (unreadMessageCounter.length)
+                unreadMessageCounter.text(parseInt(unreadMessageCounter.text()) + 1);
+            else
+                $(`[data-conversationId="${payload.data.conversation}"] img`).after('<div class="new bg-primary"><span>1</span></div>');
+
+
+            notify(`${payload.data.sender.display_name}: ${payload.data.text}`);
 
         } else if (payload.event_type === 'conversation_add') {
             addNewConversation(payload.data);
@@ -186,5 +188,18 @@ function addMessageToConversation(message, prepend = false) {
         messageContainer.prepend(finalMessage);
     else
         messageContainer.append(finalMessage);
+
+}
+
+function notify(message) {
+    if (Notification.permission === "granted") {
+        const notification = new Notification(message);
+    } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then((permission) => {
+            if (permission === "granted") {
+                const notification = new Notification("message");
+            }
+        });
+    }
 
 }

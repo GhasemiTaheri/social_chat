@@ -84,7 +84,24 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=True)
     def join(self, request, *args, **kwargs):
-        obj = self.get_object()
-        Participant.objects.create(user=request.user, conversation=obj)
+        current_user = request.user
+        obj: Conversation = self.get_object()
+        Participant.objects.create(user=current_user, conversation=obj)
+
+        try:
+            channel_layer = get_channel_layer()
+            participant_channel_name = redis_db.get(f'channel_user_{current_user.id}')
+            if participant_channel_name:
+                async_to_sync(channel_layer.group_add)(str(obj.id), participant_channel_name)
+
+                async_to_sync(channel_layer.send)(participant_channel_name, {
+                    'type': 'new.message',
+                    'message': {
+                        'event_type': 'conversation_add',
+                        'data': self.get_serializer(instance=obj).data
+                    }
+                })
+        except:
+            pass
 
         return Response(status=status.HTTP_200_OK)
