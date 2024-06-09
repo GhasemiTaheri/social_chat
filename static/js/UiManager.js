@@ -45,6 +45,20 @@ $(document).ready(function () {
 });
 
 function conversationOnClick(element) {
+    const clickedElement = $(element);
+
+    if (clickedElement.children('.new').length) {
+        clickedElement.children('.new').remove();
+        $.ajax({
+            headers: {
+                'X-CSRFToken': $('[name="csrfmiddlewaretoken"]').attr('value'),
+            },
+            url: `conversation/${clickedElement.data('conversationid')}/read_message/`,
+            method: 'post'
+        })
+    }
+
+
     const state = {
         type: 'chat-active',
         id: element.dataset.conversationid

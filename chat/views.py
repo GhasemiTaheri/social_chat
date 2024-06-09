@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max
 from django.db.models.functions import Coalesce
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import TemplateView, CreateView
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -103,5 +104,15 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
                 })
         except:
             pass
+
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=['post'], detail=True)
+    def read_message(self, request, pk, *args, **kwargs):
+        current_user = request.user
+        user_part_obj = Participant.objects.filter(conversation_id=pk, user=current_user).first()
+        if user_part_obj:
+            user_part_obj.last_read = timezone.now()
+            user_part_obj.save()
 
         return Response(status=status.HTTP_200_OK)
