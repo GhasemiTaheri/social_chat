@@ -29,6 +29,8 @@ window.addEventListener('SocketEvent', (event) => {
 
         } else if (payload.event_type === 'conversation_add') {
             addNewConversation(payload.data);
+        } else if (payload.event_type === 'conversation_remove') {
+            removeConversation(payload.data)
         }
     }
 
@@ -50,6 +52,23 @@ $(document).ready(() => {
         }
     })
 })
+
+function deleteConversation() {
+    const csrf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+    $.ajax({
+        headers: {
+            'X-CSRFToken': csrf_token,
+        },
+        url: `conversation/${window.history.state.id}/leave_conversation/`,
+        method: 'delete'
+    })
+}
+
+function removeConversation(conversation) {
+    $(`[data-conversationid=${conversation.id}]`).remove();
+    if (window.history.state.id === conversation.id)
+        window.history.back();
+}
 
 function getConversations() {
     $.ajax({
@@ -81,6 +100,21 @@ function addNewConversation(conversation) {
 }
 
 function getConversationInformation(conversationId) {
+    const groupActionList = `
+                                    <button class="dropdown-item">
+                                        <i class="material-icons">info</i>
+                                        About
+                                    </button>
+                                    <button class="dropdown-item" onclick="deleteConversation()">
+                                        <i class="material-icons">exit_to_app</i>
+                                        Leave and delete
+                                    </button>`;
+
+    const singleActionList = `<button class="dropdown-item" onclick="deleteConversation()">
+                                        <i class="material-icons">delete</i>
+                                        Delete Conversation
+                                     </button>`;
+
     $.ajax({
         url: `conversation/${conversationId}/`,
         success: (conversationInfo) => {
@@ -89,8 +123,14 @@ function getConversationInformation(conversationId) {
             conversationImg.attr('title', conversationInfo.title);
 
             let information = `<h5><a href="#">${conversationInfo.title}</a></h5>`;
-            if (conversationInfo.conversation_type === 'gr')
-                information = information + `<span>${conversationInfo.member_count} members</span>`
+            const conversationActionsMenu = $('#conversation-action');
+
+            if (conversationInfo.conversation_type === 'gr') {
+                information = information + `<span>${conversationInfo.member_count} members</span>`;
+                conversationActionsMenu.html(groupActionList);
+            } else
+                conversationActionsMenu.html(singleActionList);
+
             $('#conversation-data').html(information);
         }
     });

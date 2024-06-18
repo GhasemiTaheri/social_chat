@@ -113,3 +113,40 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
     def read_message(self, request, pk, *args, **kwargs):
         Participant.objects.filter(conversation_id=pk, user=request.user).update(last_read=timezone.now())
         return Response(status=status.HTTP_200_OK)
+
+    @action(methods=['delete'], detail=True)
+    def leave_conversation(self, request, pk, *args, **kwargs):
+        current_user = request.user
+        obj = self.get_object()
+
+        try:
+            channel_layer = get_channel_layer()
+            message_payload = {
+                'type': 'new.message',
+                'message': {
+                    'event_type': 'conversation_remove',
+                    'data': self.get_serializer(instance=obj).data
+                }
+            }
+
+            if (obj.conversation_type == Conversation.SINGLE
+                    or (obj.conversation_type == Conversation.GROUP and obj.creator == current_user)):
+
+                async_to_sync(channel_layer.group_send)(str(obj.id), message_payload)
+
+                for participant in obj.participant_set.all():
+                    async_to_sync(channel_layer.group_discard)(str(obj.id), f"channel_user_{participant.user_id}")
+
+                obj.delete()
+            else:
+                participant_channel_name = redis_db.get(f'channel_user_{current_user.id}')
+                if participant_channel_name:
+                    async_to_sync(channel_layer.send)(participant_channel_name, message_payload)
+                    async_to_sync(channel_layer.group_discard)(str(obj.id), participant_channel_name)
+
+                obj.participant_set.remove(current_user)
+
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
