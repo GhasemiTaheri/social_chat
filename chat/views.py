@@ -14,6 +14,7 @@ from chat.forms import ConversationCreateForm
 from chat.models import Conversation, Participant
 from chat.serializers import ConversationSerializer, SendMessageSerializer
 from socialmedia.settings import REDIS_SERVER as redis_db
+from utilities.paginator.pagination import MessagePagination
 from utilities.view.ViewMixin import SearchMixin
 
 
@@ -71,7 +72,8 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         return serializer.save()
 
-    @action(methods=['get'], detail=True, serializer_class=SendMessageSerializer)
+    @action(methods=['get'], detail=True, serializer_class=SendMessageSerializer,
+            pagination_class=MessagePagination)
     def get_messages(self, request, *args, **kwargs):
         queryset = self.get_object().message_set.all().order_by('-create_at')
 
@@ -109,10 +111,5 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=True)
     def read_message(self, request, pk, *args, **kwargs):
-        current_user = request.user
-        user_part_obj = Participant.objects.filter(conversation_id=pk, user=current_user).first()
-        if user_part_obj:
-            user_part_obj.last_read = timezone.now()
-            user_part_obj.save()
-
+        Participant.objects.filter(conversation_id=pk, user=request.user).update(last_read=timezone.now())
         return Response(status=status.HTTP_200_OK)

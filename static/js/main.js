@@ -37,6 +37,18 @@ window.addEventListener('SocketEvent', (event) => {
 $(document).ready(() => {
     getConversations();
     userId = window.sessionStorage.getItem('user-id');
+
+    $('#content').on('scroll', function () {
+        if (this.scrollTop === 0) {
+            const last_fetch_id = $("#message-container").children('.message').first().data('id');
+            const scrollTopBefore = this.scrollHeight;
+
+            getConversationMessage(window.history.state.id, last_fetch_id, false).then(() => {
+                const scrollTopAfter = this.scrollHeight;
+                this.scrollTop = scrollTopAfter - scrollTopBefore;
+            });
+        }
+    })
 })
 
 function getConversations() {
@@ -84,12 +96,12 @@ function getConversationInformation(conversationId) {
     });
 }
 
-function getConversationMessage(conversionId) {
-    $.ajax({
-        url: `conversation/${conversionId}/get_messages/`,
+function getConversationMessage(conversionId, last_message_id = 0, scrollToBottom = true) {
+    return $.ajax({
+        url: `conversation/${conversionId}/get_messages/?last_message_id=${last_message_id}`,
         success: ({results}) => {
             const groupedMessage = groupMessageByDate(results);
-            createArchiveMessage(groupedMessage);
+            createArchiveMessage(groupedMessage, scrollToBottom);
         }
     })
 }
@@ -107,7 +119,7 @@ function groupMessageByDate(messageList) {
     return result;
 }
 
-function createArchiveMessage(messageGroup, scrollToBottom = true) {
+function createArchiveMessage(messageGroup, scrollToBottom) {
     const messageContainer = $("#message-container");
     const dateTemplate = `<div class="date">
                                     <hr>
@@ -142,7 +154,7 @@ function addMessageToConversation(message, prepend = false) {
     const messageContainer = $("#message-container");
     const messageDate = new Date(message.create_at);
 
-    const othersMessagesTemplate = `<div class="message">
+    const othersMessagesTemplate = `<div class="message" data-id="#ID">
         <img class="avatar-md" src="#AVATAR" data-toggle="tooltip" data-placement="top" title="#TITLE" alt="avatar">
         <div class="text-main">
             <div class="text-group">
@@ -153,6 +165,7 @@ function addMessageToConversation(message, prepend = false) {
         <span>#EXTRA</span>
         </div>
     </div>`
+        .replace('#ID', message.id)
         .replace("#AVATAR", message.sender.get_avatar)
         .replace('#TITLE', message.sender.display_name)
         .replace("#TEXT", message.text)
@@ -162,7 +175,7 @@ function addMessageToConversation(message, prepend = false) {
         })}`);
 
     const myMessageTemplate =
-        `<div class="message me">
+        `<div class="message me" data-id="#ID">
                 <div class="text-main">
                     <div class="text-group me">
                         <div class="text me">
@@ -171,7 +184,9 @@ function addMessageToConversation(message, prepend = false) {
                     </div>
                     <span>#EXTRA</span>
                 </div>
-          </div>`.replace('#TEXT', message.text)
+          </div>`
+            .replace('#ID', message.id)
+            .replace('#TEXT', message.text)
             .replace('#EXTRA', `${messageDate.toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit'
