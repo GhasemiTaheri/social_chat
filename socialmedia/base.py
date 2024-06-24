@@ -1,8 +1,6 @@
-import os
 import environ
 from pathlib import Path
 
-from django.urls import reverse_lazy
 from redis import Redis
 
 env = environ.Env()
@@ -13,27 +11,26 @@ environ.Env.read_env(BASE_DIR / '.env')
 
 SECRET_KEY = env('SECRET_KEY')
 
-DEBUG = env('DEBUG')
-
-ALLOWED_HOSTS = ['*']
-
 INSTALLED_APPS = [
-    "daphne",
-    'channels',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    # 3rd
-    'crispy_forms',
-    'rest_framework',
-    'django_filters',
-    # local apps
-    'chat',
-    'user',
-]
+                     "daphne",
+                     'channels',
+
+                     'django.contrib.admin',
+                     'django.contrib.auth',
+                     'django.contrib.contenttypes',
+                     'django.contrib.sessions',
+                     'django.contrib.messages',
+                     'django.contrib.staticfiles'
+                 ] + [
+                     # 3rd
+                     'crispy_forms',
+                     'rest_framework',
+                     'django_filters',
+                 ] + [
+                     # local apps
+                     'chat',
+                     'user',
+                 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
@@ -124,15 +121,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = BASE_DIR / 'media/'
 MEDIA_URL = '/media/'
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TSL = True
-#
-# EMAIL_HOST_USER = "Email"
-# EMAIL_HOST_PASSWORD = "pass"
-
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

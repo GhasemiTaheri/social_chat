@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from chat.forms import ConversationCreateForm
 from chat.models import Conversation, Participant
 from chat.serializers import ConversationSerializer, SendMessageSerializer
-from socialmedia.settings import REDIS_SERVER as redis_db
+from django.conf import settings
 from utilities.paginator.pagination import MessagePagination
 from utilities.view.ViewMixin import SearchMixin
 
@@ -55,7 +55,7 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
 
         channel_layer = get_channel_layer()
         for i in obj.participant_set.all():
-            participant_channel_name = redis_db.get(f'channel_user_{i.user_id}')
+            participant_channel_name = settings.REDIS_SERVER.get(f'channel_user_{i.user_id}')
             if participant_channel_name:
                 async_to_sync(channel_layer.group_add)(str(obj.id), participant_channel_name)
 
@@ -93,7 +93,7 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
 
         try:
             channel_layer = get_channel_layer()
-            participant_channel_name = redis_db.get(f'channel_user_{current_user.id}')
+            participant_channel_name = settings.REDIS_SERVER.get(f'channel_user_{current_user.id}')
             if participant_channel_name:
                 async_to_sync(channel_layer.group_add)(str(obj.id), participant_channel_name)
 
@@ -139,7 +139,7 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
 
                 obj.delete()
             else:
-                participant_channel_name = redis_db.get(f'channel_user_{current_user.id}')
+                participant_channel_name = settings.REDIS_SERVER.get(f'channel_user_{current_user.id}')
                 if participant_channel_name:
                     async_to_sync(channel_layer.send)(participant_channel_name, message_payload)
                     async_to_sync(channel_layer.group_discard)(str(obj.id), participant_channel_name)

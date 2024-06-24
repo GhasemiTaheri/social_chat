@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from chat.models import Message, Conversation
 from chat.serializers import ReceiveMessageSerializer, SendMessageSerializer
-from socialmedia.settings import REDIS_SERVER as redis_db
+from django.conf import settings
 
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
@@ -20,12 +20,12 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
         await self.set_conversations()
 
-        redis_db.set(f"channel_user_{self.user.id}", str(self.channel_name))
+        settings.REDIS_SERVER.set(f"channel_user_{self.user.id}", str(self.channel_name))
 
         return await super().websocket_connect(message)
 
     async def disconnect(self, code):
-        redis_db.delete(f"channel_user_{self.user.id}")
+        settings.REDIS_SERVER.delete(f"channel_user_{self.user.id}")
 
         self.user.last_online = timezone.now()
         await self.user.asave()
