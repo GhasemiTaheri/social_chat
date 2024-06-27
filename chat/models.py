@@ -35,18 +35,6 @@ class Conversation(models.Model):
     def last_message(self):
         return self.message_set.last()
 
-    def get_avatar(self, user=None):
-        """
-        If the conversation is single, each person should show the other person's profile picture.
-        """
-        if self.conversation_type == self.GROUP:
-            if self.avatar:
-                return self.avatar.url
-            else:
-                return self.avatar.storage.url('defaults/user_default.jpg')
-        else:
-            return user.get_avatar
-
     def unread_message_count(self, participant):
         """
         This method calculates the number of unread messages by a user

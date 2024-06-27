@@ -16,13 +16,6 @@ class User(AbstractUser):
             return self.username
 
     @cached_property
-    def get_avatar(self):
-        if self.avatar:
-            return self.avatar.url
-        else:
-            return self.avatar.storage.url('defaults/user_default.jpg')
-
-    @cached_property
     def get_statics(self):
         """
         This property extracts user information to be used in the template.
