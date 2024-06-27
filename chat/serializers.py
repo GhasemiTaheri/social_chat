@@ -8,21 +8,10 @@ from chat.models import Participant, Message, Conversation, PrivateConversation
 from user.serializers import MessageSenderSerializer
 
 
-class ConversationSerializer(serializers.ModelSerializer):
-    members = PrimaryKeyRelatedField(required=False, many=True, queryset=get_user_model().objects.all())
-
-    unread_messages = SerializerMethodField(method_name="get_unread_messages")
-    last_message = SerializerMethodField(method_name="get_last_message")
-
+class ConversationBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
-        fields = ('id', 'title', 'creator',
-                  'avatar', 'conversation_type', 'members',
-                  'unread_messages', 'last_message', 'member_count')
-        extra_kwargs = {
-            'title': {'required': False},
-            'conversation_type': {'required': True},
-        }
+        fields = ('id', 'title', 'avatar', 'conversation_type')
 
     def __init__(self, instance=None, data=empty, **kwargs):
         super().__init__(instance, data, **kwargs)
@@ -33,42 +22,85 @@ class ConversationSerializer(serializers.ModelSerializer):
         except:
             pass
 
+
+class ConversationListSerializer(ConversationBaseSerializer):
+    title = serializers.SerializerMethodField(method_name='get_title')
+    avatar = serializers.SerializerMethodField(method_name='get_avatar')
+    unread_messages = SerializerMethodField(method_name="get_unread_messages")
+    last_message = SerializerMethodField(method_name="get_last_message")
+
+    class Meta(ConversationBaseSerializer.Meta):
+        model = Conversation
+        fields = ConversationBaseSerializer.Meta.fields + ('unread_messages', 'last_message')
+
+    def get_title(self, obj: Conversation):
+        if obj.conversation_type == Conversation.GROUP:
+            return obj.title
+
+        if hasattr(obj, 'conversation_name'):
+            if obj.conversation_name.get('first_name') and obj.conversation_name.get('last_name'):
+                return f"{obj.conversation_name.get('first_name')} {obj.conversation_name.get('last_name')}"
+
+            return obj.conversation_name.get('username')
+        else:
+            return obj.participant_set.exclude(user=self.request.user).first().user.display_name
+
+    def get_avatar(self, obj: Conversation):
+        if obj.conversation_type == Conversation.GROUP:
+            return obj.avatar.url if obj.avatar else None
+
+        if hasattr(obj, 'conversation_name'):
+            return obj.conversation_name.get('avatar') or None
+        else:
+            other_participants = (obj.participant_set
+                                  .exclude(user=self.request.user)
+                                  .values('user__avatar')[:1])[0]
+
+            return other_participants.get('user__avatar') or None
+
     def get_unread_messages(self, obj: Conversation):
         """
         Because each user has different unread messages than the other,
         we need to get the current user and then call the corresponding functions.
         """
-        assert self.request is not None, "Request is required"
+        if hasattr(obj, 'unread_message_count'):
+            return obj.unread_message_count
 
         return obj.unread_message_count(self.request.user)
 
     def get_last_message(self, obj: Conversation):
-        message = obj.last_message
-        if message:
-            return message.text
+        if hasattr(obj, 'last_message_text'):
+            last_message = str(obj.last_message_text) if obj.last_message_text else ''
         else:
-            return ''
+            last_message = str(obj.last_message.text) if obj.last_message else ''
 
-    def to_representation(self, instance: Conversation):
-        assert self.request is not None, "Request is required"
+        return last_message
 
-        representation = super().to_representation(instance)
 
-        if instance.conversation_type == instance.SINGLE:
-            """
-            If there is a private conversation.
-            We need to display the profile picture and name of the user chatting with the current user.
-            """
-            other_participant = instance.participant_set.exclude(user=self.request.user).first().user
-            representation['title'] = other_participant.get_full_name() or other_participant.username
-            try:
-                representation['avatar'] = instance.get_avatar(other_participant)
-            except Exception as e:
-                representation['avatar'] = None
-        else:
-            representation['avatar'] = instance.get_avatar()
+class ConversationRetrieveSerializer(ConversationBaseSerializer):
+    member_count = serializers.SerializerMethodField(method_name='get_member_count')
 
-        return representation
+    class Meta(ConversationBaseSerializer.Meta):
+        model = Conversation
+        fields = ConversationBaseSerializer.Meta.fields + ('member_count',)
+
+    def get_member_count(self, obj: Conversation):
+        if hasattr(obj, 'participant_count'):
+            return obj.participant_count
+
+        return obj.member_count
+
+
+class ConversationInputSerializer(ConversationBaseSerializer):
+    members = PrimaryKeyRelatedField(required=False, many=True, queryset=get_user_model().objects.all())
+
+    class Meta(ConversationBaseSerializer.Meta):
+        model = Conversation
+        fields = ConversationBaseSerializer.Meta.fields + ('members',)
+        extra_kwargs = {
+            'title': {'required': False},
+            'conversation_type': {'required': True},
+        }
 
     def validate(self, attrs):
         if attrs.get('conversation_type') == Conversation.SINGLE:
