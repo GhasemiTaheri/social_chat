@@ -1,5 +1,3 @@
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max, Count, Q, Subquery, OuterRef, Case, When, Value
 from django.db.models.functions import Coalesce, Greatest, JSONObject
@@ -13,10 +11,10 @@ from rest_framework.response import Response
 from chat.forms import ConversationCreateForm
 from chat.models import Conversation, Participant, Message
 from chat.serializers import ConversationListSerializer, SendMessageSerializer, ConversationInputSerializer, \
-    ConversationRetrieveSerializer
-from django.conf import settings
+    ConversationRetrieveSerializer, ConversationBaseSerializer
 from utilities.paginator.pagination import MessagePagination
-from utilities.view.ViewMixin import SearchMixin
+from utilities.socket.socket_mixin import WebSocketMixin
+from utilities.view.viewset_mixin import SearchMixin
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -34,7 +32,7 @@ class GroupCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
 
-class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
+class ConversationViewSet(WebSocketMixin, SearchMixin, viewsets.ModelViewSet):
     search_fields = ('^title',)
 
     def get_serializer_class(self):
@@ -47,7 +45,7 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
         elif self.action.lower() in ['create', 'update']:
             return ConversationInputSerializer
 
-        return super().get_serializer_class()
+        return ConversationBaseSerializer
 
     def get_queryset(self):
         current_user = self.request.user
@@ -98,15 +96,10 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        obj: Conversation = self.perform_create(serializer)
+        obj: Conversation = serializer.save()
 
-        channel_layer = get_channel_layer()
-        for i in obj.participant_set.all():
-            participant_channel_name = settings.REDIS_SERVER.get(f'channel_user_{i.user_id}')
-            if participant_channel_name:
-                async_to_sync(channel_layer.group_add)(str(obj.id), participant_channel_name)
-
-        async_to_sync(channel_layer.group_send)(str(obj.id), {
+        user_ids = list(obj.participant_set.all().values_list('id', flat=True))
+        self.add_users_to_group(str(obj.id), user_ids, payload={
             'type': 'new.message',
             'message': {
                 'event_type': 'conversation_add',
@@ -116,88 +109,72 @@ class ConversationViewSet(SearchMixin, viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_200_OK)
 
-    def perform_create(self, serializer):
-        return serializer.save()
+    @action(methods=['get'], detail=True, serializer_class=SendMessageSerializer,
+            pagination_class=MessagePagination)
+    def get_messages(self, request, *args, **kwargs):
+        queryset = (self.get_object()
+                    .message_set.all()
+                    .select_related('sender')
+                    .order_by('-create_at'))
 
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
-@action(methods=['get'], detail=True, serializer_class=SendMessageSerializer,
-        pagination_class=MessagePagination)
-def get_messages(self, request, *args, **kwargs):
-    queryset = self.get_object().message_set.all().order_by('-create_at')
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
-    page = self.paginate_queryset(queryset)
-    if page is not None:
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+    @action(methods=['post'], detail=True)
+    def join(self, request, *args, **kwargs):
+        current_user = request.user
+        obj: Conversation = self.get_object()
+        Participant.objects.create(user=current_user, conversation=obj)
 
-    serializer = self.get_serializer(queryset, many=True)
-    return Response(serializer.data)
-
-
-@action(methods=['post'], detail=True)
-def join(self, request, *args, **kwargs):
-    current_user = request.user
-    obj: Conversation = self.get_object()
-    Participant.objects.create(user=current_user, conversation=obj)
-
-    try:
-        channel_layer = get_channel_layer()
-        participant_channel_name = settings.REDIS_SERVER.get(f'channel_user_{current_user.id}')
-        if participant_channel_name:
-            async_to_sync(channel_layer.group_add)(str(obj.id), participant_channel_name)
-
-            async_to_sync(channel_layer.send)(participant_channel_name, {
+        try:
+            self.add_users_to_group(obj.id, [current_user.id], payload={
                 'type': 'new.message',
                 'message': {
                     'event_type': 'conversation_add',
                     'data': self.get_serializer(instance=obj).data
                 }
             })
-    except:
-        pass
+        except Exception as e:
+            print(e)
+            raise
 
-    return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
+    @action(methods=['post'], detail=True)
+    def read_message(self, request, pk, *args, **kwargs):
+        Participant.objects.filter(conversation_id=pk, user=request.user).update(last_read=timezone.now())
+        return Response(status=status.HTTP_200_OK)
 
-@action(methods=['post'], detail=True)
-def read_message(self, request, pk, *args, **kwargs):
-    Participant.objects.filter(conversation_id=pk, user=request.user).update(last_read=timezone.now())
-    return Response(status=status.HTTP_200_OK)
+    @action(methods=['delete'], detail=True)
+    def leave_conversation(self, request, pk, *args, **kwargs):
+        current_user = request.user
+        obj = self.get_object()
 
-
-@action(methods=['delete'], detail=True)
-def leave_conversation(self, request, pk, *args, **kwargs):
-    current_user = request.user
-    obj = self.get_object()
-
-    try:
-        channel_layer = get_channel_layer()
-        message_payload = {
-            'type': 'new.message',
-            'message': {
-                'event_type': 'conversation_remove',
-                'data': self.get_serializer(instance=obj).data
+        try:
+            payload = {
+                'type': 'new.message',
+                'message': {
+                    'event_type': 'conversation_remove',
+                    'data': self.get_serializer(instance=obj).data
+                }
             }
-        }
 
-        if (obj.conversation_type == Conversation.SINGLE
-                or (obj.conversation_type == Conversation.GROUP and obj.creator == current_user)):
+            if (obj.conversation_type == Conversation.SINGLE
+                    or obj.conversation_type == Conversation.GROUP and obj.creator == current_user):
+                user_ids = list(obj.participant_set.all().values_list('id', flat=True))
 
-            async_to_sync(channel_layer.group_send)(str(obj.id), message_payload)
+                self.remove_from_group(str(obj.id), user_ids, payload=payload)
+                obj.delete()
+            else:
+                obj.participant_set.remove(current_user)
+                self.remove_from_group(str(obj.id), [current_user.id], payload=payload)
+        except Exception as e:
+            print(e)
+            raise
 
-            for participant in obj.participant_set.all():
-                async_to_sync(channel_layer.group_discard)(str(obj.id), f"channel_user_{participant.user_id}")
-
-            obj.delete()
-        else:
-            participant_channel_name = settings.REDIS_SERVER.get(f'channel_user_{current_user.id}')
-            if participant_channel_name:
-                async_to_sync(channel_layer.send)(participant_channel_name, message_payload)
-                async_to_sync(channel_layer.group_discard)(str(obj.id), participant_channel_name)
-
-            obj.participant_set.remove(current_user)
-
-    except:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)

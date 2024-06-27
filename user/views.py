@@ -10,7 +10,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from user.forms import UserRegisterForm
 from user.models import User
 from user.serializers import UserUpdateSerializer, PublicUserSerializer
-from utilities.view.ViewMixin import SearchMixin
+from utilities.view.viewset_mixin import SearchMixin
 
 
 class SignUpView(CreateView):
