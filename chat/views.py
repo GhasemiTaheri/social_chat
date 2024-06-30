@@ -50,9 +50,16 @@ class ConversationViewSet(WebSocketMixin, SearchMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         current_user = self.request.user
 
+        other_participant = (Participant.objects
+                             .filter(Q(conversation_id=OuterRef('pk')) & ~Q(user_id=current_user.id))
+                             .annotate(participant_info=JSONObject(username='user__username',
+                                                                   first_name="user__first_name",
+                                                                   last_name="user__last_name",
+                                                                   avatar="user__avatar")))
+
         queryset = Conversation.objects.filter(participant__user_id=current_user.id)
 
-        if self.action in ['search', 'join']:
+        if self.action.lower() in ['search', 'join']:
             return (Conversation.objects
                     .exclude(id__in=Subquery(queryset.values('id')))
                     .order_by('id'))
@@ -63,14 +70,8 @@ class ConversationViewSet(WebSocketMixin, SearchMixin, viewsets.ModelViewSet):
                                      .filter(conversation=OuterRef('pk'))
                                      .order_by('-create_at')[:1])
 
-            other_participant = (Participant.objects
-                                 .filter(Q(conversation_id=OuterRef('pk')) & ~Q(user_id=current_user.id))
-                                 .annotate(participant_info=JSONObject(username='user__username',
-                                                                       first_name="user__first_name",
-                                                                       last_name="user__last_name",
-                                                                       avatar="user__avatar")))
-
             return (queryset
+                    .defer('creator', 'created_at', 'updated_at')
                     .annotate(last_message_date=Greatest(last_message_subquery.values('create_at'),
                                                          Max('created_at')),
                               last_message_text=Subquery(last_message_subquery.values('text')))
@@ -86,11 +87,16 @@ class ConversationViewSet(WebSocketMixin, SearchMixin, viewsets.ModelViewSet):
                     .order_by('last_message_date'))
 
         if self.action.lower() == 'retrieve':
-            return queryset.annotate(participant_count=Case(
-                When(conversation_type=Conversation.GROUP, then=Count('participant')),
-                default=Value(2)
-            ))
-
+            return (queryset
+                    .defer('created_at', 'updated_at')
+                    .annotate(participant_count=Case(When(conversation_type=Conversation.GROUP,
+                                                          then=Count('participant')),
+                                                     default=Value(2)))
+                    .annotate(conversation_name=Case(When(conversation_type=Conversation.SINGLE,
+                                                          then=Subquery(
+                                                              other_participant.values('participant_info')))
+                                                     ))
+                    )
         return queryset
 
     def create(self, request, *args, **kwargs):

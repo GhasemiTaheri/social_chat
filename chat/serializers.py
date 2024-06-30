@@ -22,17 +22,6 @@ class ConversationBaseSerializer(serializers.ModelSerializer):
         except:
             pass
 
-
-class ConversationListSerializer(ConversationBaseSerializer):
-    title = serializers.SerializerMethodField(method_name='get_title')
-    avatar = serializers.SerializerMethodField(method_name='get_avatar')
-    unread_messages = SerializerMethodField(method_name="get_unread_messages")
-    last_message = SerializerMethodField(method_name="get_last_message")
-
-    class Meta(ConversationBaseSerializer.Meta):
-        model = Conversation
-        fields = ConversationBaseSerializer.Meta.fields + ('unread_messages', 'last_message')
-
     def get_title(self, obj: Conversation):
         if obj.conversation_type == Conversation.GROUP:
             return obj.title
@@ -44,6 +33,17 @@ class ConversationListSerializer(ConversationBaseSerializer):
             return obj.conversation_name.get('username')
         else:
             return obj.participant_set.exclude(user=self.request.user).first().user.display_name
+
+
+class ConversationListSerializer(ConversationBaseSerializer):
+    title = serializers.SerializerMethodField(method_name='get_title')
+    avatar = serializers.SerializerMethodField(method_name='get_avatar')
+    unread_messages = SerializerMethodField(method_name="get_unread_messages")
+    last_message = SerializerMethodField(method_name="get_last_message")
+
+    class Meta(ConversationBaseSerializer.Meta):
+        model = Conversation
+        fields = ConversationBaseSerializer.Meta.fields + ('unread_messages', 'last_message')
 
     def get_avatar(self, obj: Conversation):
         if obj.conversation_type == Conversation.GROUP:
@@ -78,6 +78,7 @@ class ConversationListSerializer(ConversationBaseSerializer):
 
 
 class ConversationRetrieveSerializer(ConversationBaseSerializer):
+    title = serializers.SerializerMethodField(method_name='get_title')
     member_count = serializers.SerializerMethodField(method_name='get_member_count')
 
     class Meta(ConversationBaseSerializer.Meta):
