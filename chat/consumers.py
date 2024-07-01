@@ -5,7 +5,7 @@ from django.db.models import CharField
 from django.db.models.functions import Cast
 from django.utils import timezone
 
-from chat.models import Message, Conversation
+from chat.models import Message, Conversation, Participant
 from chat.serializers import ReceiveMessageSerializer, SendMessageSerializer
 from django.conf import settings
 
@@ -42,24 +42,24 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         msg = await Message.objects.acreate(sender_id=self.user.id,
                                             conversation_id=serializer.validated_data.get('conversation'),
                                             text=serializer.validated_data.get('message'))
+        await database_sync_to_async(lambda: (Participant.objects
+                                              .filter(user_id=msg.sender.id,
+                                                      conversation_id=msg.conversation.id)
+                                              .update(last_read=timezone.now())))()
         if msg:
             await self.channel_layer.group_send(
                 str(serializer.validated_data.get('conversation')),
                 {
                     'type': 'new.message',
-                    'message': await self.serialize_new_message(msg)
+                    'message': await database_sync_to_async(lambda: ({
+                        'event_type': 'new_message',
+                        'data': SendMessageSerializer(instance=msg).data
+                    }))()
                 }
             )
 
     async def new_message(self, event):
         await self.send_json(event.get('message'))
-
-    @database_sync_to_async
-    def serialize_new_message(self, msg):
-        return {
-            'event_type': 'new_message',
-            'data': SendMessageSerializer(instance=msg).data
-        }
 
     @database_sync_to_async
     def set_conversations(self) -> None:

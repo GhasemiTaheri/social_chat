@@ -48,16 +48,17 @@ function conversationOnClick(element) {
     const clickedElement = $(element);
 
     if (clickedElement.children('.new').length) {
-        clickedElement.children('.new').remove();
         $.ajax({
             headers: {
                 'X-CSRFToken': $('[name="csrfmiddlewaretoken"]').attr('value'),
             },
             url: `conversation/${clickedElement.data('conversationid')}/read_message/`,
-            method: 'post'
+            method: 'post',
+            success: () => {
+                clickedElement.children('.new').remove();
+            }
         })
     }
-
 
     const state = {
         type: 'chat-active',

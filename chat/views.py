@@ -33,6 +33,7 @@ class GroupCreateView(LoginRequiredMixin, CreateView):
 
 
 class ConversationViewSet(WebSocketMixin, SearchMixin, viewsets.ModelViewSet):
+    serializer_class = ConversationBaseSerializer
     search_fields = ('^title',)
 
     def get_serializer_class(self):
@@ -45,7 +46,7 @@ class ConversationViewSet(WebSocketMixin, SearchMixin, viewsets.ModelViewSet):
         elif self.action.lower() in ['create', 'update']:
             return ConversationInputSerializer
 
-        return ConversationBaseSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self):
         current_user = self.request.user
