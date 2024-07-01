@@ -260,7 +260,6 @@ class ConversationManager {
 
     handleScroll(event) {
         if (event.target.scrollTop === 0) {
-            console.log('im runn mojtaba')
             const lastFetchId = $("#message-container").children('.message').first().data('id');
             const scrollTopBefore = event.target.scrollHeight;
 

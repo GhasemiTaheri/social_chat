@@ -18,9 +18,9 @@ class Conversation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=100)
     creator = models.ForeignKey(get_user_model(),
-                                on_delete=models.SET_DEFAULT,
-                                # 0 default value means deleted account
-                                default=0)
+                                on_delete=models.SET_NULL,
+                                # null value means deleted account
+                                null=True)
     conversation_type = models.CharField(max_length=2, choices=CONVERSATION_TYPES, null=True)
     # only group can have avatar
     avatar = models.ImageField(upload_to='group_avatar/', blank=True, null=True)
@@ -79,9 +79,9 @@ class PrivateConversation(Conversation):
 
 class Participant(models.Model):
     user = models.ForeignKey(get_user_model(),
-                             on_delete=models.SET_DEFAULT,
-                             # 0 default value means deleted account
-                             default=0)
+                             on_delete=models.SET_NULL,
+                             # null value means deleted account
+                             null=True)
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
     last_read = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

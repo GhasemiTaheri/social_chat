@@ -35,6 +35,12 @@ class UserUpdateDestroyApiView(UpdateModelMixin, DestroyModelMixin, GenericAPIVi
     def get_object(self):
         return self.request.user
 
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
 
 class UserReadViewSet(SearchMixin, ReadOnlyModelViewSet):
     serializer_class = PublicUserSerializer
