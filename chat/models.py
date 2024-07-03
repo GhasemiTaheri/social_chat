@@ -47,6 +47,9 @@ class Conversation(models.Model):
         except:
             return 0
 
+    def get_single_conversation_title(self, user):
+        return self.participant_set.exclude(user=user).first().user.display_name
+
     def __str__(self):
         return f"{self.get_conversation_type_display()} - {self.title}"
 

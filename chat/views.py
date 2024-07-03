@@ -1,14 +1,13 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Max, Count, Q, Subquery, OuterRef, Case, When, Value
+from django.db.models import Max, Count, Q, Subquery, OuterRef, Case, When, Value, F
 from django.db.models.functions import Coalesce, Greatest, JSONObject
-from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import TemplateView, CreateView
+from django.views.generic import TemplateView
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from chat.forms import ConversationCreateForm
 from chat.models import Conversation, Participant, Message
 from chat.serializers import ConversationListSerializer, SendMessageSerializer, ConversationInputSerializer, \
     ConversationRetrieveSerializer, ConversationBaseSerializer
@@ -19,17 +18,6 @@ from utilities.view.viewset_mixin import SearchMixin
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'chat/dashboard.html'
-
-
-class GroupCreateView(LoginRequiredMixin, CreateView):
-    form_class = ConversationCreateForm
-    template_name = 'chat/create_group.html'
-    success_url = reverse_lazy('chat:dashboard')
-
-    def get_form_kwargs(self):
-        kwargs = super(GroupCreateView, self).get_form_kwargs()
-        kwargs.update({'request': self.request})
-        return kwargs
 
 
 class ConversationViewSet(WebSocketMixin, SearchMixin, viewsets.ModelViewSet):
@@ -82,8 +70,7 @@ class ConversationViewSet(WebSocketMixin, SearchMixin, viewsets.ModelViewSet):
                                                              'participant__created_at'))
                                                          ))
                     .annotate(conversation_name=Case(When(conversation_type=Conversation.SINGLE,
-                                                          then=Subquery(
-                                                              other_participant.values('participant_info')))
+                                                          then=Subquery(other_participant.values('participant_info')))
                                                      ))
                     .order_by('last_message_date'))
 
@@ -114,7 +101,7 @@ class ConversationViewSet(WebSocketMixin, SearchMixin, viewsets.ModelViewSet):
             }
         })
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=['get'], detail=True, serializer_class=SendMessageSerializer,
             pagination_class=MessagePagination)
@@ -136,10 +123,13 @@ class ConversationViewSet(WebSocketMixin, SearchMixin, viewsets.ModelViewSet):
     def join(self, request, *args, **kwargs):
         current_user = request.user
         obj: Conversation = self.get_object()
-        Participant.objects.create(user=current_user, conversation=obj)
 
+        if obj.conversation_type == Conversation.SINGLE:
+            raise ValidationError("You cannot join this conversation")
+
+        Participant.objects.create(user=current_user, conversation=obj)
         try:
-            self.add_users_to_group(obj.id, [current_user.id], payload={
+            self.add_users_to_group(str(obj.id), [current_user.id], payload={
                 'type': 'new.message',
                 'message': {
                     'event_type': 'conversation_add',

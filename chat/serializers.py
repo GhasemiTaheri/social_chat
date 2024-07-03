@@ -32,7 +32,7 @@ class ConversationBaseSerializer(serializers.ModelSerializer):
 
             return obj.conversation_name.get('username')
         else:
-            return obj.participant_set.exclude(user=self.request.user).first().user.display_name
+            return obj.get_single_conversation_title(self.current_user)
 
 
 class ConversationListSerializer(ConversationBaseSerializer):
