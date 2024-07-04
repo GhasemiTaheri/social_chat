@@ -2,11 +2,39 @@ version: '3.9'
 
 services:
 
-  proxy:
-    image: nginx
   backend:
     build: .
+    command: >
+      sh -c "
+      export DJANGO_SETTINGS_MODULE=socialmedia.production &&
+      python3 manage.py migrate &&
+      python3 manage.py create_default_user --username=admin --password=admin --email=mghasemi13786@gmail.com &&
+      daphne -b 0.0.0.0 -p 8000 socialmedia.asgi:application
+      "
+    ports:
+      - "8000:8000"
+    volumes:
+      - social_chat_media:/app/media/
+      - .:/app
+    depends_on:
+      - db
+      - channel_layer
+    env_file:
+      - ./evniron/.production
+
   db:
     image: postgres
-  redis:
+    volumes:
+      - social_chat_db:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=4542
+      - POSTGRES_DB=social_chat
+
+  channel_layer:
     image: redis
+
+
+volumes:
+  social_chat_db:
+  social_chat_media:
